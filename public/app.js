@@ -55,7 +55,9 @@ async function createRoom() {
   const roomRef = await db.collection('rooms').doc();
 
   console.log('Create PeerConnection with configuration: ', configuration);
-  peerConnection = new RTCPeerConnection(configuration);
+  peerConnection = new RTCPeerConnection(configuration, {optional: [{
+    RtpDataChannels: true
+  }]});
 
   registerPeerConnectionListeners();
 
@@ -149,7 +151,9 @@ async function joinRoomById(roomId) {
 
   if (roomSnapshot.exists) {
     console.log('Create PeerConnection with configuration: ', configuration);
-    peerConnection = new RTCPeerConnection(configuration);
+    peerConnection = new RTCPeerConnection(configuration,{optional: [{
+      RtpDataChannels: true
+    }]});
     registerPeerConnectionListeners();
     localStream.getTracks().forEach(track => {
       peerConnection.addTrack(track, localStream);
@@ -302,7 +306,7 @@ async function createConnection() {
   
   sendChannel = peerConnection.createDataChannel('sendDataChannel');
   sendChannel.binaryType = 'arraybuffer';
-  console.log('Created send data channel');
+  console.log('Created send data channel, ', sendChannel);
 
   sendChannel.addEventListener('open', onSendChannelStateChange);
   sendChannel.addEventListener('close', onSendChannelStateChange);
