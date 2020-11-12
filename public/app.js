@@ -55,9 +55,7 @@ async function createRoom() {
   const roomRef = await db.collection('rooms').doc();
 
   console.log('Create PeerConnection with configuration: ', configuration);
-  peerConnection = new RTCPeerConnection(configuration, {optional: [{
-    RtpDataChannels: true
-  }]});
+  peerConnection = new RTCPeerConnection(configuration);
 
   registerPeerConnectionListeners();
 
@@ -77,6 +75,10 @@ async function createRoom() {
     callerCandidatesCollection.add(event.candidate.toJSON());
   });
   // Code for collecting ICE candidates above
+
+
+  //datachannel create
+  createConnection();
 
   // Code for creating a room below
   const offer = await peerConnection.createOffer();
@@ -299,7 +301,7 @@ async function handleFileInputChange() {
     sendFileButton.disabled = false;
   }
 }
-sendFileButton.addEventListener('click', () => createConnection());
+sendFileButton.addEventListener('click', () => sendData());
 async function createConnection() {
   abortButton.disabled = false;
   sendFileButton.disabled = true;
@@ -318,9 +320,6 @@ async function createConnection() {
 function onSendChannelStateChange() {
   const readyState = sendChannel.readyState;
   console.log(`Send channel state is: ${readyState}`);
-  if (readyState === 'open') {
-    sendData();
-  }
 }
 
 function sendData() {
