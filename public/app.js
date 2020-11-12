@@ -153,9 +153,7 @@ async function joinRoomById(roomId) {
 
   if (roomSnapshot.exists) {
     console.log('Create PeerConnection with configuration: ', configuration);
-    peerConnection = new RTCPeerConnection(configuration,{optional: [{
-      RtpDataChannels: true
-    }]});
+    peerConnection = new RTCPeerConnection(configuration);
     registerPeerConnectionListeners();
     localStream.getTracks().forEach(track => {
       peerConnection.addTrack(track, localStream);
