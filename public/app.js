@@ -76,7 +76,6 @@ async function createRoom() {
   });
   // Code for collecting ICE candidates above
 
-
   //datachannel create
   createConnection();
 
@@ -179,10 +178,14 @@ async function joinRoomById(roomId) {
       });
     });
 
+    //datachannel create
+    createConnection();
+
     // Code for creating SDP answer below
     const offer = roomSnapshot.data().offer;
     console.log('Got offer:', offer);
     await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+    
     const answer = await peerConnection.createAnswer();
     console.log('Created answer:', answer);
     await peerConnection.setLocalDescription(answer);
@@ -311,8 +314,6 @@ async function createConnection() {
   sendChannel.addEventListener('open', onSendChannelStateChange);
   sendChannel.addEventListener('close', onSendChannelStateChange);
   sendChannel.addEventListener('error', error => console.error('Error in sendChannel:', error));
-
-  fileInput.disabled = true;
 }
 
 function onSendChannelStateChange() {
@@ -321,6 +322,7 @@ function onSendChannelStateChange() {
 }
 
 function sendData() {
+  fileInput.disabled = true;
   const file = fileInput.files[0];
   console.log(`File is ${[file.name, file.size, file.type, file.lastModified].join(' ')}`);
 
