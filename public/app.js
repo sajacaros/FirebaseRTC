@@ -331,7 +331,7 @@ function sendData() {
   if (file.size === 0) {
     bitrateDiv.innerHTML = '';
     statusMessage.textContent = 'File is empty, please select a non-empty file';
-    closeDataChannels();
+    completedFileSend();
     return;
   }
   sendProgress.max = file.size;
@@ -415,7 +415,7 @@ function onReceiveMessageCallback(event) {
         statsInterval = null;
       }
 
-      closeDataChannels();
+      completedFileSend();
     }
   }
 }
@@ -460,17 +460,26 @@ async function displayStats() {
   }
 }
 
-function closeDataChannels() {
-  console.log('Closing data channels');
-  sendChannel.close();
-  console.log(`Closed data channel with label: ${sendChannel.label}`);
-  if (receiveChannel) {
-    receiveChannel.close();
-    console.log(`Closed data channel with label: ${receiveChannel.label}`);
-  }
+function completedFileSend() {
+  console.log('complete file send');
 
   // re-enable the file select
   fileInput.disabled = false;
   abortButton.disabled = true;
   sendFileButton.disabled = false;
 }
+
+// function closeDataChannels() {
+//   console.log('Closing data channels');
+//   sendChannel.close();
+//   console.log(`Closed data channel with label: ${sendChannel.label}`);
+//   if (receiveChannel) {
+//     receiveChannel.close();
+//     console.log(`Closed data channel with label: ${receiveChannel.label}`);
+//   }
+
+//   // re-enable the file select
+//   fileInput.disabled = false;
+//   abortButton.disabled = true;
+//   sendFileButton.disabled = false;
+// }
