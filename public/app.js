@@ -385,7 +385,7 @@ var incomingFileInfo;
 
 function onReceiveMessageCallback(event) {
   if(downloadInProgress=== false) {
-    incomingFileInfo = JSON.parse( data.toString() );
+    incomingFileInfo = JSON.parse( event.data.toString() );
     console.log(`${incomingFileInfo.fileName} : ${incomingFileInfo.fileSize}`);
     downloadInProgress = true;
   } else {
