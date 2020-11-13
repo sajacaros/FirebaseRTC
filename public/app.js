@@ -402,7 +402,7 @@ function onReceiveMessageCallback(event) {
       downloadAnchor.href = URL.createObjectURL(received);
       downloadAnchor.download = incomingFileInfo.fileName;
       downloadAnchor.textContent =
-        `Click to download '${file.name}' (${file.size} bytes)`;
+        `Click to download '${incomingFileInfo.fileName}' (${incomingFileInfo.fileSize} bytes)`;
       downloadAnchor.style.display = 'block';
 
       const bitrate = Math.round(receivedSize * 8 /
