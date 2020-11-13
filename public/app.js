@@ -352,6 +352,8 @@ function sendData() {
     sendProgress.value = offset;
     if (offset < file.size) {
       readSlice(offset);
+    } else {
+      completedFileSend();
     }
   });
   const readSlice = o => {
@@ -466,7 +468,7 @@ function completedFileSend() {
   // re-enable the file select
   fileInput.disabled = false;
   abortButton.disabled = true;
-  sendFileButton.disabled = false;
+  sendFileButton.disabled = true;
 }
 
 // function closeDataChannels() {
