@@ -39,7 +39,6 @@ let timestampStart;
 let statsInterval = null;
 let bitrateMax = 0;
 
-
 function init() {
   document.querySelector('#cameraBtn').addEventListener('click', openUserMedia);
   document.querySelector('#hangupBtn').addEventListener('click', hangUp);
@@ -308,7 +307,7 @@ async function createConnection() {
   sendFileButton.disabled = true;
   
   sendChannel = peerConnection.createDataChannel('sendDataChannel');
-  sendChannel.binaryType = 'arraybuffer';
+  // sendChannel.binaryType = 'arraybuffer';
   console.log('Created send data channel, ', sendChannel);
 
   sendChannel.addEventListener('open', onSendChannelStateChange);
@@ -337,6 +336,10 @@ function sendData() {
   }
   sendProgress.max = file.size;
   receiveProgress.max = file.size;
+  sendChannel.send(JSON.stringify({
+    fileName: file.name,
+    fileSize: file.size
+  }));
   const chunkSize = 16384;
   fileReader = new FileReader();
   let offset = 0;
@@ -362,7 +365,7 @@ function sendData() {
 function receiveChannelCallback(event) {
   console.log('Receive Channel Callback');
   receiveChannel = event.channel;
-  receiveChannel.binaryType = 'arraybuffer';
+  // receiveChannel.binaryType = 'arraybuffer';
   receiveChannel.onmessage = onReceiveMessageCallback;
   receiveChannel.onopen = onReceiveChannelStateChange;
   receiveChannel.onclose = onReceiveChannelStateChange;
@@ -377,38 +380,43 @@ function receiveChannelCallback(event) {
   }
 }
 
+var downloadInProgress = false;
+var incomingFileInfo;
+
 function onReceiveMessageCallback(event) {
-  console.log(`Received Message ${event.data.byteLength}`);
-  receiveBuffer.push(event.data);
-  receivedSize += event.data.byteLength;
+  if(downloadInProgress=== false) {
+    incomingFileInfo = JSON.parse( data.toString() );
+    console.log(`${incomingFileInfo.fileName} : ${incomingFileInfo.fileSize}`);
+    downloadInProgress = true;
+  } else {
+    console.log(`Received Message ${event.data.byteLength}`);
+    receiveBuffer.push(event.data);
+    receivedSize += event.data.byteLength;
 
-  receiveProgress.value = receivedSize;
+    receiveProgress.value = receivedSize;
 
-  // we are assuming that our signaling protocol told
-  // about the expected file size (and name, hash, etc).
-  const file = fileInput.files[0];
-  console.log('---', file);
-  if (receivedSize === file.size) {
-    const received = new Blob(receiveBuffer);
-    receiveBuffer = [];
+    if (receivedSize === incomingFileInfo.fileSize) {
+      const received = new Blob(receiveBuffer);
+      receiveBuffer = [];
 
-    downloadAnchor.href = URL.createObjectURL(received);
-    downloadAnchor.download = file.name;
-    downloadAnchor.textContent =
-      `Click to download '${file.name}' (${file.size} bytes)`;
-    downloadAnchor.style.display = 'block';
+      downloadAnchor.href = URL.createObjectURL(received);
+      downloadAnchor.download = incomingFileInfo.fileName;
+      downloadAnchor.textContent =
+        `Click to download '${file.name}' (${file.size} bytes)`;
+      downloadAnchor.style.display = 'block';
 
-    const bitrate = Math.round(receivedSize * 8 /
-      ((new Date()).getTime() - timestampStart));
-    bitrateDiv.innerHTML =
-      `<strong>Average Bitrate:</strong> ${bitrate} kbits/sec (max: ${bitrateMax} kbits/sec)`;
+      const bitrate = Math.round(receivedSize * 8 /
+        ((new Date()).getTime() - timestampStart));
+      bitrateDiv.innerHTML =
+        `<strong>Average Bitrate:</strong> ${bitrate} kbits/sec (max: ${bitrateMax} kbits/sec)`;
 
-    if (statsInterval) {
-      clearInterval(statsInterval);
-      statsInterval = null;
+      if (statsInterval) {
+        clearInterval(statsInterval);
+        statsInterval = null;
+      }
+
+      closeDataChannels();
     }
-
-    closeDataChannels();
   }
 }
 
