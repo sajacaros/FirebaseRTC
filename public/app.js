@@ -387,6 +387,7 @@ function onReceiveMessageCallback(event) {
   // we are assuming that our signaling protocol told
   // about the expected file size (and name, hash, etc).
   const file = fileInput.files[0];
+  console.log('---', file);
   if (receivedSize === file.size) {
     const received = new Blob(receiveBuffer);
     receiveBuffer = [];
@@ -414,6 +415,7 @@ function onReceiveMessageCallback(event) {
 async function onReceiveChannelStateChange() {
   const readyState = receiveChannel.readyState;
   console.log(`Receive channel state is: ${readyState}`);
+  console.log('peerconnection : ', peerConnection);
   if (readyState === 'open') {
     timestampStart = (new Date()).getTime();
     timestampPrev = timestampStart;
@@ -424,8 +426,8 @@ async function onReceiveChannelStateChange() {
 
 // display bitrate statistics.
 async function displayStats() {
-  if (remoteConnection && remoteConnection.iceConnectionState === 'connected') {
-    const stats = await remoteConnection.getStats();
+  if (peerConnection && peerConnection.iceConnectionState === 'connected') {
+    const stats = await peerConnection.getStats();
     let activeCandidatePair;
     stats.forEach(report => {
       if (report.type === 'transport') {
