@@ -72,8 +72,8 @@ function changeVideoCodec() {
     let recvCodecs = RTCRtpReceiver.getCapabilities(kind).codecs;
 
     if (kind === "audio") {
-      sendCodecs = preferCodec('audio/opus');
-      recvCodecs = preferCodec('audio/opus');
+      sendCodecs = preferCodec(sendCodecs, 'audio/opus');
+      recvCodecs = preferCodec(recvCodecs, 'audio/opus');
       transceiver.setCodecPreferences([...sendCodecs, ...recvCodecs]);
     }
   });
