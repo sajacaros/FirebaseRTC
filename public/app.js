@@ -60,7 +60,7 @@ function preferCodec(codecs, mimeType) {
     }
   });
 
-  return sortedCodecs.concat(otherCodecs);
+  return sortedCodecs;//.concat(otherCodecs);
 }
 
 function changeAudioCodec() {
