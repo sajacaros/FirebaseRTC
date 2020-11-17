@@ -47,6 +47,40 @@ function init() {
   roomDialog = new mdc.dialog.MDCDialog(document.querySelector('#room-dialog'));
 }
 
+function preferCodec(codecs, mimeType) {
+  let otherCodecs = [];
+  let sortedCodecs = [];
+  let count = codecs.length;
+
+  codecs.forEach(codec => {
+    if (codec.mimeType === mimeType) {
+      sortedCodecs.push(codec);
+    } else {
+      otherCodecs.push(codec);
+    }
+  });
+
+  return sortedCodecs.concat(otherCodecs);
+}
+
+function changeVideoCodec() {
+  const transceivers = peerConnection.getTransceivers();
+
+  transceivers.forEach(transceiver => {
+    const kind = transceiver.sender.track.kind;
+    let sendCodecs = RTCRtpSender.getCapabilities(kind).codecs;
+    let recvCodecs = RTCRtpReceiver.getCapabilities(kind).codecs;
+
+    if (kind === "audio") {
+      sendCodecs = preferCodec('audio/opus');
+      recvCodecs = preferCodec('audio/opus');
+      transceiver.setCodecPreferences([...sendCodecs, ...recvCodecs]);
+    }
+  });
+
+  // peerConnection.onnegotiationneeded();
+}
+
 async function createRoom() {
   document.querySelector('#createBtn').disabled = true;
   document.querySelector('#joinBtn').disabled = true;
@@ -78,6 +112,9 @@ async function createRoom() {
   //datachannel create
   createConnection();
 
+  peerConnection.onnegotiationneeded = (t, event)=> console.log(event);
+  changeVideoCodec();
+  
   // Code for creating a room below
   const offer = await peerConnection.createOffer();
   await peerConnection.setLocalDescription(offer);
@@ -331,7 +368,7 @@ function sendData() {
   if (file.size === 0) {
     bitrateDiv.innerHTML = '';
     statusMessage.textContent = 'File is empty, please select a non-empty file';
-    completedFileSend();
+    initFileSend();
     return;
   }
   sendProgress.max = file.size;
@@ -353,7 +390,7 @@ function sendData() {
     if (offset < file.size) {
       readSlice(offset);
     } else {
-      completedFileSend();
+      initFileSend();
     }
   });
   const readSlice = o => {
@@ -417,7 +454,7 @@ function onReceiveMessageCallback(event) {
         statsInterval = null;
       }
 
-      completedFileSend();
+      initFileSend();
     }
   }
 }
@@ -462,13 +499,21 @@ async function displayStats() {
   }
 }
 
-function completedFileSend() {
+function initFileSend() {
   console.log('complete file send');
 
   // re-enable the file select
   fileInput.disabled = false;
   abortButton.disabled = true;
   sendFileButton.disabled = true;
+  downloadInProgress = false;
+  receiveBuffer = [];
+  receivedSize = 0;
+
+  bytesPrev = 0;
+  timestampPrev = 0;
+  statsInterval = null;
+  bitrateMax = 0;
 }
 
 // function closeDataChannels() {
