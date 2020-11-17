@@ -63,7 +63,7 @@ function preferCodec(codecs, mimeType) {
   return sortedCodecs;//.concat(otherCodecs);
 }
 
-function changeAudioCodec() {
+function changeCodec() {
   const transceivers = peerConnection.getTransceivers();
 
   transceivers.forEach(transceiver => {
@@ -75,7 +75,13 @@ function changeAudioCodec() {
       sendCodecs = preferCodec(sendCodecs, 'audio/opus');
       recvCodecs = preferCodec(recvCodecs, 'audio/opus');
       console.log("change audio, prefer sendcodec : ", sendCodecs);
-      console.log("change audio, prefer sendcodec : ", recvCodecs);
+      console.log("change audio, prefer recvcodec : ", recvCodecs);
+      transceiver.setCodecPreferences([...sendCodecs, ...recvCodecs]);
+    } else if (kind === "video") {
+      sendCodecs = preferCodec(sendCodecs, 'video/H264');
+      recvCodecs = preferCodec(recvCodecs, 'video/H264');
+      console.log("change video, prefer sendcodec : ", sendCodecs);
+      console.log("change video, prefer recvcodec : ", recvCodecs);
       transceiver.setCodecPreferences([...sendCodecs, ...recvCodecs]);
     }
   });
@@ -115,7 +121,7 @@ async function createRoom() {
   createConnection();
 
   peerConnection.onnegotiationneeded = (...args)=> console.log('onnegotiationeeded, args : ', args);
-  changeAudioCodec();
+  changeCodec();
   
   // Code for creating a room below
   const offer = await peerConnection.createOffer();
@@ -224,7 +230,7 @@ async function joinRoomById(roomId) {
     console.log('Got offer:', offer);
     await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
     
-    changeAudioCodec();
+    changeCodec();
     const answer = await peerConnection.createAnswer();
     console.log('Created answer:', answer);
     await peerConnection.setLocalDescription(answer);
