@@ -1,4 +1,5 @@
 mdc.ripple.MDCRipple.attachTo(document.querySelector('.mdc-button'));
+let transceiver = null;
 
 const configuration = {
   iceServers: [
@@ -42,6 +43,7 @@ async function createRoom() {
   registerPeerConnectionListeners();
 
   localStream.getTracks().forEach(track => {
+    console.log('Add a track to the localStream:', track);
     peerConnection.addTrack(track, localStream);
   });
 
@@ -126,28 +128,35 @@ function joinRoom() {
 function sendRecv() {
   console.log('sendRecv, state : ', peerConnection.connectionState);
   if(peerConnection.connectionState === 'connected') {
+    // peerConnection.addTransceiver('video', {direction: "sendrecv"});
     peerConnection.getTransceivers().forEach(t=>{
       console.log('direction change, transceiver : ', t);
       t.direction='sendrecv'
+      console.log('current direction : ', t.currentDirection);
     });
   }
-
 }
+
 function sendOnly() {
   console.log('sendOnly, state : ', peerConnection.connectionState);
   if(peerConnection.connectionState === 'connected') {
+    // transceiver.direction='sendonly';
+    // peerConnection.addTransceiver('video', {direction: "sendonly"});
     peerConnection.getTransceivers().forEach(t=>{
       console.log('direction change, transceiver : ', t);
       t.direction='sendonly';
+      console.log('current direction : ', t.currentDirection);
     });
   }
 }
 function recvOnly() {
   console.log('recvOnly, state : ', peerConnection.connectionState);
   if(peerConnection.connectionState === 'connected') {
+    // peerConnection.addTransceiver('video', {direction: "recvonly"});
     peerConnection.getTransceivers().forEach(t=>{
       console.log('direction change, transceiver : ', t);
       t.direction='recvonly';
+      console.log('current direction : ', t.currentDirection);
     });
   }
 }
@@ -163,7 +172,9 @@ async function joinRoomById(roomId) {
     peerConnection = new RTCPeerConnection(configuration);
     registerPeerConnectionListeners();
     enableDirectionButton();
+
     localStream.getTracks().forEach(track => {
+      console.log('track info : ', track);
       peerConnection.addTrack(track, localStream);
     });
 
