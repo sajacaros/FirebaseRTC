@@ -23,6 +23,9 @@ function init() {
   document.querySelector('#hangupBtn').addEventListener('click', hangUp);
   document.querySelector('#createBtn').addEventListener('click', createRoom);
   document.querySelector('#joinBtn').addEventListener('click', joinRoom);
+  document.querySelector('#sendrecvBtn').addEventListener('click', sendRecv);
+  document.querySelector('#sendonlyBtn').addEventListener('click', sendOnly);
+  document.querySelector('#recvonlyBtn').addEventListener('click', recvOnly);
   roomDialog = new mdc.dialog.MDCDialog(document.querySelector('#room-dialog'));
 }
 
@@ -35,6 +38,7 @@ async function createRoom() {
   console.log('Create PeerConnection with configuration: ', configuration);
   peerConnection = new RTCPeerConnection(configuration);
 
+  enableDirectionButton();
   registerPeerConnectionListeners();
 
   localStream.getTracks().forEach(track => {
@@ -119,6 +123,35 @@ function joinRoom() {
   roomDialog.open();
 }
 
+function sendRecv() {
+  console.log('sendRecv, state : ', peerConnection.connectionState);
+  if(peerConnection.connectionState === 'connected') {
+    peerConnection.getTransceivers().forEach(t=>{
+      console.log('direction change, transceiver : ', t);
+      t.direction='sendrecv'
+    });
+  }
+
+}
+function sendOnly() {
+  console.log('sendOnly, state : ', peerConnection.connectionState);
+  if(peerConnection.connectionState === 'connected') {
+    peerConnection.getTransceivers().forEach(t=>{
+      console.log('direction change, transceiver : ', t);
+      t.direction='sendonly';
+    });
+  }
+}
+function recvOnly() {
+  console.log('recvOnly, state : ', peerConnection.connectionState);
+  if(peerConnection.connectionState === 'connected') {
+    peerConnection.getTransceivers().forEach(t=>{
+      console.log('direction change, transceiver : ', t);
+      t.direction='recvonly';
+    });
+  }
+}
+
 async function joinRoomById(roomId) {
   const db = firebase.firestore();
   const roomRef = db.collection('rooms').doc(`${roomId}`);
@@ -129,6 +162,7 @@ async function joinRoomById(roomId) {
     console.log('Create PeerConnection with configuration: ', configuration);
     peerConnection = new RTCPeerConnection(configuration);
     registerPeerConnectionListeners();
+    enableDirectionButton();
     localStream.getTracks().forEach(track => {
       peerConnection.addTrack(track, localStream);
     });
@@ -219,6 +253,9 @@ async function hangUp(e) {
   document.querySelector('#joinBtn').disabled = true;
   document.querySelector('#createBtn').disabled = true;
   document.querySelector('#hangupBtn').disabled = true;
+  document.querySelector('#sendrecvBtn').disabled = true;
+  document.querySelector('#sendonlyBtn').disabled = true;
+  document.querySelector('#recvonlyBtn').disabled = true;
   document.querySelector('#currentRoom').innerText = '';
 
   // Delete room on hangup
@@ -239,6 +276,12 @@ async function hangUp(e) {
   document.location.reload();
 }
 
+function enableDirectionButton() {
+  document.querySelector('#sendrecvBtn').disabled = false;
+  document.querySelector('#sendonlyBtn').disabled = false;
+  document.querySelector('#recvonlyBtn').disabled = false;
+}
+
 function registerPeerConnectionListeners() {
   peerConnection.addEventListener('icegatheringstatechange', () => {
     console.log(
@@ -256,6 +299,11 @@ function registerPeerConnectionListeners() {
   peerConnection.addEventListener('iceconnectionstatechange ', () => {
     console.log(
         `ICE connection state change: ${peerConnection.iceConnectionState}`);
+  });
+
+  peerConnection.addEventListener('negotiationneeded  ', () => {
+    console.log(
+        `Peerconnection negotiationneeded event: ${peerConnection.currentDirection}`);
   });
 }
 
