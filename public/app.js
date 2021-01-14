@@ -10,6 +10,7 @@ const configuration = {
     },
   ],
   iceCandidatePoolSize: 10,
+  sdpSemantics: 'unified-plan'
 };
 
 let peerConnection = null;
@@ -28,7 +29,7 @@ function init() {
   document.querySelector('#recvonlyBtn').addEventListener('click', recvOnly);
   roomDialog = new mdc.dialog.MDCDialog(document.querySelector('#room-dialog'));
 }
-
+let videoTransceiver = null; 
 async function createRoom() {
   document.querySelector('#createBtn').disabled = true;
   document.querySelector('#joinBtn').disabled = true;
@@ -41,9 +42,16 @@ async function createRoom() {
   enableDirectionButton();
   registerPeerConnectionListeners();
 
-  localStream.getTracks().forEach(track => {
-    peerConnection.addTrack(track, localStream);
-  });
+  videoTransceiver = peerConnection.addTransceiver(localStream.getVideoTracks()[0], {
+      direction: "sendrecv",
+      streams: [localStream],
+    },
+  );
+
+  // localStream.getTracks().forEach(track => {
+  //   peerConnection.addTrack(track, localStream);
+  //   // peerConnection.addTransceiver(track, localStream);
+  // });
 
   // Code for collecting ICE candidates below
   const callerCandidatesCollection = roomRef.collection('callerCandidates');
@@ -124,32 +132,33 @@ function joinRoom() {
 }
 
 function sendRecv() {
-  console.log('sendRecv, state : ', peerConnection.connectionState);
-  if(peerConnection.connectionState === 'connected') {
-    peerConnection.getTransceivers().forEach(t=>{
-      console.log('direction change, transceiver : ', t);
-      t.direction='sendrecv'
-    });
-  }
-
+  // console.log('sendRecv, state : ', peerConnection.connectionState);
+  
+  // if(peerConnection.connectionState === 'connected') {
+    videoTransceiver.direction='sendrecv'
+    // videoTransceiver = peerConnection.addTransceiver(localStream.getVideoTracks()[0], {
+    //   direction: "sendrecv",
+    //   streams: [localStream],
+    // },
+  // );
+  // }
 }
 function sendOnly() {
-  console.log('sendOnly, state : ', peerConnection.connectionState);
-  if(peerConnection.connectionState === 'connected') {
-    peerConnection.getTransceivers().forEach(t=>{
-      console.log('direction change, transceiver : ', t);
-      t.direction='sendonly';
-    });
-  }
+  // console.log('sendOnly, state : ', peerConnection.connectionState);
+  // if(peerConnection.connectionState === 'connected') {
+    videoTransceiver.direction='sendonly';
+    
+  // }
 }
 function recvOnly() {
-  console.log('recvOnly, state : ', peerConnection.connectionState);
-  if(peerConnection.connectionState === 'connected') {
-    peerConnection.getTransceivers().forEach(t=>{
-      console.log('direction change, transceiver : ', t);
-      t.direction='recvonly';
-    });
-  }
+  // console.log('recvOnly, state : ', peerConnection.connectionState);
+  // if(peerConnection.connectionState === 'connected') {
+    // peerConnection.addTransceiver('video', {direction:'recvonly'});
+    // peerConnection.getTransceivers().forEach(t=>{
+    //   console.log('direction change, transceiver : ', t);
+    videoTransceiver.direction='recvonly';
+    // });
+  // }
 }
 
 async function joinRoomById(roomId) {
