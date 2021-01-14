@@ -42,12 +42,10 @@ async function createRoom() {
   enableDirectionButton();
   registerPeerConnectionListeners();
 
-  videoTransceiver = peerConnection.addTransceiver(localStream.getVideoTracks()[0], {
-      direction: "sendrecv",
-      streams: [localStream],
-    },
-  );
-
+  videoTransceiver = peerConnection.addTransceiver(localStream.getVideoTracks()[0]);
+  videoTransceiver.receiver.track.onmute = () => console.log("transceiver.receiver.track.onmute");
+  videoTransceiver.receiver.track.onended = () => console.log("transceiver.receiver.track.onended");
+  videoTransceiver.receiver.track.onunmute = () => console.log("transceiver.receiver.track.onunmute");
   // localStream.getTracks().forEach(track => {
   //   peerConnection.addTrack(track, localStream);
   //   // peerConnection.addTransceiver(track, localStream);
