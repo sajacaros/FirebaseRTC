@@ -1,4 +1,5 @@
 mdc.ripple.MDCRipple.attachTo(document.querySelector('.mdc-button'));
+let transceiver = null;
 
 const configuration = {
   iceServers: [
@@ -52,6 +53,10 @@ async function createRoom() {
   //   peerConnection.addTrack(track, localStream);
   //   // peerConnection.addTransceiver(track, localStream);
   // });
+  localStream.getTracks().forEach(track => {
+    console.log('Add a track to the localStream:', track);
+    peerConnection.addTrack(track, localStream);
+  });
 
   // Code for collecting ICE candidates below
   const callerCandidatesCollection = roomRef.collection('callerCandidates');
@@ -132,6 +137,7 @@ function joinRoom() {
 }
 
 function sendRecv() {
+<<<<<<< HEAD
   // console.log('sendRecv, state : ', peerConnection.connectionState);
   
   // if(peerConnection.connectionState === 'connected') {
@@ -142,8 +148,21 @@ function sendRecv() {
     // },
   // );
   // }
+=======
+  console.log('sendRecv, state : ', peerConnection.connectionState);
+  if(peerConnection.connectionState === 'connected') {
+    // peerConnection.addTransceiver('video', {direction: "sendrecv"});
+    peerConnection.getTransceivers().forEach(t=>{
+      console.log('direction change, transceiver : ', t);
+      t.direction='sendrecv'
+      console.log('current direction : ', t.currentDirection);
+    });
+  }
+>>>>>>> 00f3195a0965b218310a05ae22ee848668f670f8
 }
+
 function sendOnly() {
+<<<<<<< HEAD
   // console.log('sendOnly, state : ', peerConnection.connectionState);
   // if(peerConnection.connectionState === 'connected') {
     videoTransceiver.direction='sendonly';
@@ -159,6 +178,29 @@ function recvOnly() {
     videoTransceiver.direction='recvonly';
     // });
   // }
+=======
+  console.log('sendOnly, state : ', peerConnection.connectionState);
+  if(peerConnection.connectionState === 'connected') {
+    // transceiver.direction='sendonly';
+    // peerConnection.addTransceiver('video', {direction: "sendonly"});
+    peerConnection.getTransceivers().forEach(t=>{
+      console.log('direction change, transceiver : ', t);
+      t.direction='sendonly';
+      console.log('current direction : ', t.currentDirection);
+    });
+  }
+}
+function recvOnly() {
+  console.log('recvOnly, state : ', peerConnection.connectionState);
+  if(peerConnection.connectionState === 'connected') {
+    // peerConnection.addTransceiver('video', {direction: "recvonly"});
+    peerConnection.getTransceivers().forEach(t=>{
+      console.log('direction change, transceiver : ', t);
+      t.direction='recvonly';
+      console.log('current direction : ', t.currentDirection);
+    });
+  }
+>>>>>>> 00f3195a0965b218310a05ae22ee848668f670f8
 }
 
 async function joinRoomById(roomId) {
@@ -172,7 +214,9 @@ async function joinRoomById(roomId) {
     peerConnection = new RTCPeerConnection(configuration);
     registerPeerConnectionListeners();
     enableDirectionButton();
+
     localStream.getTracks().forEach(track => {
+      console.log('track info : ', track);
       peerConnection.addTrack(track, localStream);
     });
 
