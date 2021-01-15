@@ -18,6 +18,8 @@ let localStream = null;
 let remoteStream = null;
 let roomDialog = null;
 let roomId = null;
+let localTransceiver = null;
+let remoteTransceiver = null;
 
 function init() {
   document.querySelector('#cameraBtn').addEventListener('click', openUserMedia);
@@ -29,7 +31,7 @@ function init() {
   document.querySelector('#recvonlyBtn').addEventListener('click', recvOnly);
   roomDialog = new mdc.dialog.MDCDialog(document.querySelector('#room-dialog'));
 }
-let videoTransceiver = null; 
+ 
 async function createRoom() {
   document.querySelector('#createBtn').disabled = true;
   document.querySelector('#joinBtn').disabled = true;
@@ -42,10 +44,10 @@ async function createRoom() {
   enableDirectionButton();
   registerPeerConnectionListeners();
 
-  videoTransceiver = peerConnection.addTransceiver(localStream.getVideoTracks()[0]);
-  videoTransceiver.receiver.track.onmute = () => console.log("transceiver.receiver.track.onmute");
-  videoTransceiver.receiver.track.onended = () => console.log("transceiver.receiver.track.onended");
-  videoTransceiver.receiver.track.onunmute = () => console.log("transceiver.receiver.track.onunmute");
+  localTransceiver = peerConnection.addTransceiver(localStream.getVideoTracks()[0]);
+  localTransceiver.receiver.track.onmute = () => console.log("transceiver.receiver.track.onmute");
+  localTransceiver.receiver.track.onended = () => console.log("transceiver.receiver.track.onended");
+  localTransceiver.receiver.track.onunmute = () => console.log("transceiver.receiver.track.onunmute");
   // localStream.getTracks().forEach(track => {
   //   peerConnection.addTrack(track, localStream);
   //   // peerConnection.addTransceiver(track, localStream);
@@ -84,8 +86,10 @@ async function createRoom() {
 
   peerConnection.addEventListener('track', event => {
     console.log('Got remote track:', event.streams[0]);
+    
     event.streams[0].getTracks().forEach(track => {
       console.log('Add a track to the remoteStream:', track);
+      
       remoteStream.addTrack(track);
     });
   });
@@ -133,8 +137,8 @@ function sendRecv() {
   // console.log('sendRecv, state : ', peerConnection.connectionState);
   
   // if(peerConnection.connectionState === 'connected') {
-  console.log('videoTransceiver : ', videoTransceiver);  
-  videoTransceiver.direction='sendrecv'
+  console.log('videoTransceiver : ', localTransceiver);  
+  localTransceiver.direction='sendrecv'
     // videoTransceiver = peerConnection.addTransceiver(localStream.getVideoTracks()[0], {
     //   direction: "sendrecv",
     //   streams: [localStream],
@@ -145,8 +149,8 @@ function sendRecv() {
 function sendOnly() {
   // console.log('sendOnly, state : ', peerConnection.connectionState);
   // if(peerConnection.connectionState === 'connected') {
-  console.log('videoTransceiver : ', videoTransceiver);
-  videoTransceiver.direction='sendonly';
+  console.log('videoTransceiver : ', localTransceiver);
+  localTransceiver.direction='sendonly';
     
   // }
 }
@@ -156,8 +160,8 @@ function recvOnly() {
     // peerConnection.addTransceiver('video', {direction:'recvonly'});
     // peerConnection.getTransceivers().forEach(t=>{
     //   console.log('direction change, transceiver : ', t);
-  console.log('videoTransceiver : ', videoTransceiver);
-  videoTransceiver.direction='recvonly';
+  console.log('videoTransceiver : ', localTransceiver);
+  localTransceiver.direction='recvonly';
     // });
   // }
 }
@@ -173,9 +177,13 @@ async function joinRoomById(roomId) {
     peerConnection = new RTCPeerConnection(configuration);
     registerPeerConnectionListeners();
     enableDirectionButton();
-    localStream.getTracks().forEach(track => {
-      peerConnection.addTrack(track, localStream);
-    });
+    localTransceiver = peerConnection.addTransceiver(localStream.getVideoTracks()[0]);
+    localTransceiver.receiver.track.onmute = () => console.log("transceiver.receiver.track.onmute");
+    localTransceiver.receiver.track.onended = () => console.log("transceiver.receiver.track.onended");
+    localTransceiver.receiver.track.onunmute = () => console.log("transceiver.receiver.track.onunmute");
+    // localStream.getTracks().forEach(track => {
+    //   peerConnection.addTrack(track, localStream);
+    // });
 
     // Code for collecting ICE candidates below
     const calleeCandidatesCollection = roomRef.collection('calleeCandidates');
