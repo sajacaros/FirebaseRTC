@@ -44,10 +44,7 @@ async function createRoom() {
   enableDirectionButton();
   registerPeerConnectionListeners();
 
-  localTransceiver = peerConnection.addTransceiver(localStream.getVideoTracks()[0]);
-  localTransceiver.receiver.track.onmute = () => console.log("transceiver.receiver.track.onmute");
-  localTransceiver.receiver.track.onended = () => console.log("transceiver.receiver.track.onended");
-  localTransceiver.receiver.track.onunmute = () => console.log("transceiver.receiver.track.onunmute");
+  
   // localStream.getTracks().forEach(track => {
   //   peerConnection.addTrack(track, localStream);
   //   // peerConnection.addTransceiver(track, localStream);
@@ -70,6 +67,12 @@ async function createRoom() {
   const offer = await peerConnection.createOffer();
   await peerConnection.setLocalDescription(offer);
   console.log('Created offer:', offer);
+
+  localTransceiver = peerConnection.addTransceiver(localStream.getVideoTracks()[0]);
+  console.log('localTransceiver : ', localTransceiver);
+  localTransceiver.receiver.track.onmute = () => console.log("transceiver.receiver.track.onmute");
+  localTransceiver.receiver.track.onended = () => console.log("transceiver.receiver.track.onended");
+  localTransceiver.receiver.track.onunmute = () => console.log("transceiver.receiver.track.onunmute");
 
   const roomWithOffer = {
     'offer': {
@@ -179,11 +182,7 @@ async function joinRoomById(roomId) {
     peerConnection = new RTCPeerConnection(configuration);
     registerPeerConnectionListeners();
     enableDirectionButton();
-    localTransceiver = peerConnection.addTransceiver(localStream.getVideoTracks()[0]);
-    console.log('localTransceiver : ', localTransceiver);
-    localTransceiver.receiver.track.onmute = () => console.log("transceiver.receiver.track.onmute");
-    localTransceiver.receiver.track.onended = () => console.log("transceiver.receiver.track.onended");
-    localTransceiver.receiver.track.onunmute = () => console.log("transceiver.receiver.track.onunmute");
+    
     // localStream.getTracks().forEach(track => {
     //   peerConnection.addTrack(track, localStream);
     // });
@@ -217,6 +216,12 @@ async function joinRoomById(roomId) {
     const answer = await peerConnection.createAnswer();
     console.log('Created answer:', answer);
     await peerConnection.setLocalDescription(answer);
+
+    localTransceiver = peerConnection.addTransceiver(localStream.getVideoTracks()[0]);
+    console.log('localTransceiver : ', localTransceiver);
+    localTransceiver.receiver.track.onmute = () => console.log("transceiver.receiver.track.onmute");
+    localTransceiver.receiver.track.onended = () => console.log("transceiver.receiver.track.onended");
+    localTransceiver.receiver.track.onunmute = () => console.log("transceiver.receiver.track.onunmute");
 
     const roomWithAnswer = {
       answer: {
