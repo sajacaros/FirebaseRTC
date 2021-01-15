@@ -85,7 +85,7 @@ async function createRoom() {
   // Code for creating a room above
 
   peerConnection.addEventListener('track', event => {
-    console.log('Got remote track:', event.streams[0]);
+    console.log('Got remote track:', event);
     
     event.streams[0].getTracks().forEach(track => {
       console.log('Add a track to the remoteStream:', track);
@@ -198,7 +198,7 @@ async function joinRoomById(roomId) {
     // Code for collecting ICE candidates above
 
     peerConnection.addEventListener('track', event => {
-      console.log('Got remote track:', event.streams[0]);
+      console.log('Got remote track:', event);
       event.streams[0].getTracks().forEach(track => {
         console.log('Add a track to the remoteStream:', track);
         remoteStream.addTrack(track);
