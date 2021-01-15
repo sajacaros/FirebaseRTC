@@ -180,6 +180,7 @@ async function joinRoomById(roomId) {
     registerPeerConnectionListeners();
     enableDirectionButton();
     localTransceiver = peerConnection.addTransceiver(localStream.getVideoTracks()[0]);
+    console.log('localTransceiver : ', localTransceiver);
     localTransceiver.receiver.track.onmute = () => console.log("transceiver.receiver.track.onmute");
     localTransceiver.receiver.track.onended = () => console.log("transceiver.receiver.track.onended");
     localTransceiver.receiver.track.onunmute = () => console.log("transceiver.receiver.track.onunmute");
