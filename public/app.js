@@ -324,12 +324,12 @@ function registerPeerConnectionListeners() {
     console.log(`Signaling state change: ${peerConnection.signalingState}`);
   });
 
-  peerConnection.addEventListener('iceconnectionstatechange ', () => {
+  peerConnection.addEventListener('iceconnectionstatechange', () => {
     console.log(
         `ICE connection state change: ${peerConnection.iceConnectionState}`);
   });
 
-  peerConnection.addEventListener('negotiationneeded  ', () => {
+  peerConnection.addEventListener('negotiationneeded', () => {
     console.log(
         `Peerconnection negotiationneeded event: ${peerConnection.currentDirection}`);
   });
