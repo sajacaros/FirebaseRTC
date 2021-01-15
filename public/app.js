@@ -44,11 +44,12 @@ async function createRoom() {
   enableDirectionButton();
   registerPeerConnectionListeners();
 
-  
-  localStream.getTracks().forEach(track => {
-    peerConnection.addTrack(track, localStream);
+  peerConnection.addTransceiver(localStream.getVideoTracks()[0]);
+  // localStream.getTracks().forEach(track => {
+  //   console.log('1');
+    // peerConnection.addTrack(track, localStream);
     // peerConnection.addTransceiver(track, localStream);
-  });
+  // });
 
   // Code for collecting ICE candidates below
   const callerCandidatesCollection = roomRef.collection('callerCandidates');
@@ -64,7 +65,9 @@ async function createRoom() {
   // Code for collecting ICE candidates above
 
   // Code for creating a room below
+  console.log('2');
   const offer = await peerConnection.createOffer();
+  console.log('3');
   await peerConnection.setLocalDescription(offer);
   console.log('Created offer:', offer);
 
@@ -161,7 +164,6 @@ function sendOnly() {
   // }
 }
 function recvOnly() {
-  console.log('recvonly tramsceiver : ', t);
   // console.log('recvOnly, state : ', peerConnection.connectionState);
   // if(peerConnection.connectionState === 'connected') {
     // peerConnection.addTransceiver('video', {direction:'recvonly'});
@@ -172,6 +174,7 @@ function recvOnly() {
     // });
   // }
   peerConnection.getTransceivers().forEach(t=>{
+    console.log('recvonly tramsceiver : ', t);
     t.direction='recvonly';
   });
 }
@@ -188,9 +191,10 @@ async function joinRoomById(roomId) {
     registerPeerConnectionListeners();
     enableDirectionButton();
     
-    localStream.getTracks().forEach(track => {
-      peerConnection.addTrack(track, localStream);
-    });
+    // localStream.getTracks().forEach(track => {
+    //   peerConnection.addTrack(track, localStream);
+    // });
+    peerConnection.addTransceiver(localStream.getVideoTracks()[0]);
 
     // Code for collecting ICE candidates below
     const calleeCandidatesCollection = roomRef.collection('calleeCandidates');
