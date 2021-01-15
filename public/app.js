@@ -133,7 +133,8 @@ function sendRecv() {
   // console.log('sendRecv, state : ', peerConnection.connectionState);
   
   // if(peerConnection.connectionState === 'connected') {
-    videoTransceiver.direction='sendrecv'
+  console.log('videoTransceiver : ', videoTransceiver);  
+  videoTransceiver.direction='sendrecv'
     // videoTransceiver = peerConnection.addTransceiver(localStream.getVideoTracks()[0], {
     //   direction: "sendrecv",
     //   streams: [localStream],
@@ -144,7 +145,8 @@ function sendRecv() {
 function sendOnly() {
   // console.log('sendOnly, state : ', peerConnection.connectionState);
   // if(peerConnection.connectionState === 'connected') {
-    videoTransceiver.direction='sendonly';
+  console.log('videoTransceiver : ', videoTransceiver);
+  videoTransceiver.direction='sendonly';
     
   // }
 }
@@ -154,7 +156,8 @@ function recvOnly() {
     // peerConnection.addTransceiver('video', {direction:'recvonly'});
     // peerConnection.getTransceivers().forEach(t=>{
     //   console.log('direction change, transceiver : ', t);
-    videoTransceiver.direction='recvonly';
+  console.log('videoTransceiver : ', videoTransceiver);
+  videoTransceiver.direction='recvonly';
     // });
   // }
 }
