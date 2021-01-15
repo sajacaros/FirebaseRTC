@@ -44,7 +44,7 @@ async function createRoom() {
   enableDirectionButton();
   registerPeerConnectionListeners();
 
-  localTransceiver = peerConnection.addTransceiver(localStream.getVideoTracks()[0]);
+  localTransceiver = peerConnection.addTransceiver(localStream.getTracks()[0]);
   localTransceiver.receiver.track.onmute = () => console.log("transceiver.receiver.track.onmute");
   localTransceiver.receiver.track.onended = () => console.log("transceiver.receiver.track.onended");
   localTransceiver.receiver.track.onunmute = () => console.log("transceiver.receiver.track.onunmute");
@@ -177,7 +177,7 @@ async function joinRoomById(roomId) {
     peerConnection = new RTCPeerConnection(configuration);
     registerPeerConnectionListeners();
     enableDirectionButton();
-    localTransceiver = peerConnection.addTransceiver(localStream.getVideoTracks()[0]);
+    localTransceiver = peerConnection.addTransceiver(localStream.getTracks()[0]);
     localTransceiver.receiver.track.onmute = () => console.log("transceiver.receiver.track.onmute");
     localTransceiver.receiver.track.onended = () => console.log("transceiver.receiver.track.onended");
     localTransceiver.receiver.track.onunmute = () => console.log("transceiver.receiver.track.onunmute");
