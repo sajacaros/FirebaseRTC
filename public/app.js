@@ -329,9 +329,10 @@ function registerPeerConnectionListeners() {
         `ICE connection state change: ${peerConnection.iceConnectionState}`);
   });
 
-  peerConnection.addEventListener('negotiationneeded', () => {
-    console.log(
-        `Peerconnection negotiationneeded event: ${peerConnection.currentDirection}`);
+  peerConnection.addEventListener('negotiationneeded', (e) => {
+    console.log(`Peerconnection negotiationneeded event: ${e}`);
+    peerConnection.createOffer()
+      .then(offer=>peerConnection.setLocalDescription(offer));
   });
 }
 
