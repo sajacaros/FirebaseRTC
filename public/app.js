@@ -44,7 +44,9 @@ async function createRoom() {
   enableDirectionButton();
   registerPeerConnectionListeners();
 
+  console.log('0');
   peerConnection.addTransceiver(localStream.getVideoTracks()[0]);
+  console.log('1');
   // localStream.getTracks().forEach(track => {
   //   console.log('1');
     // peerConnection.addTrack(track, localStream);
@@ -194,7 +196,9 @@ async function joinRoomById(roomId) {
     // localStream.getTracks().forEach(track => {
     //   peerConnection.addTrack(track, localStream);
     // });
+    console.log('0');
     peerConnection.addTransceiver(localStream.getVideoTracks()[0]);
+    console.log('1');
 
     // Code for collecting ICE candidates below
     const calleeCandidatesCollection = roomRef.collection('calleeCandidates');
