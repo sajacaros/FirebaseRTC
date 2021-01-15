@@ -45,10 +45,10 @@ async function createRoom() {
   registerPeerConnectionListeners();
 
   
-  // localStream.getTracks().forEach(track => {
-  //   peerConnection.addTrack(track, localStream);
-  //   // peerConnection.addTransceiver(track, localStream);
-  // });
+  localStream.getTracks().forEach(track => {
+    peerConnection.addTrack(track, localStream);
+    // peerConnection.addTransceiver(track, localStream);
+  });
 
   // Code for collecting ICE candidates below
   const callerCandidatesCollection = roomRef.collection('callerCandidates');
@@ -68,11 +68,11 @@ async function createRoom() {
   await peerConnection.setLocalDescription(offer);
   console.log('Created offer:', offer);
 
-  localTransceiver = peerConnection.addTransceiver(localStream.getVideoTracks()[0]);
-  console.log('localTransceiver : ', localTransceiver);
-  localTransceiver.receiver.track.onmute = () => console.log("transceiver.receiver.track.onmute");
-  localTransceiver.receiver.track.onended = () => console.log("transceiver.receiver.track.onended");
-  localTransceiver.receiver.track.onunmute = () => console.log("transceiver.receiver.track.onunmute");
+  // localTransceiver = peerConnection.addTransceiver(localStream.getVideoTracks()[0]);
+  // console.log('localTransceiver : ', localTransceiver);
+  // localTransceiver.receiver.track.onmute = () => console.log("transceiver.receiver.track.onmute");
+  // localTransceiver.receiver.track.onended = () => console.log("transceiver.receiver.track.onended");
+  // localTransceiver.receiver.track.onunmute = () => console.log("transceiver.receiver.track.onunmute");
 
   const roomWithOffer = {
     'offer': {
@@ -90,13 +90,13 @@ async function createRoom() {
   peerConnection.addEventListener('track', event => {
     console.log('Got remote track:', event);
     
-    remoteStream.addTrack(event.transceiver.receiver.track);
-    console.log('Add a track to the remoteStream:', event.transceiver.receiver.track);
-    // event.streams[0].getTracks().forEach(track => {
-    //   console.log('Add a track to the remoteStream:', track);
+    // remoteStream.addTrack(event.transceiver.receiver.track);
+    // console.log('Add a track to the remoteStream:', event.transceiver.receiver.track);
+    event.streams[0].getTracks().forEach(track => {
+      console.log('Add a track to the remoteStream:', track);
       
-    //   remoteStream.addTrack(track);
-    // });
+      remoteStream.addTrack(track);
+    });
   });
 
   // Listening for remote session description below
@@ -142,21 +142,20 @@ function sendRecv() {
   // console.log('sendRecv, state : ', peerConnection.connectionState);
   
   // if(peerConnection.connectionState === 'connected') {
-  console.log('videoTransceiver : ', localTransceiver);  
-  localTransceiver.direction='sendrecv'
-    // videoTransceiver = peerConnection.addTransceiver(localStream.getVideoTracks()[0], {
-    //   direction: "sendrecv",
-    //   streams: [localStream],
-    // },
-  // );
-  // }
+  // console.log('videoTransceiver : ', localTransceiver);  
+  // localTransceiver.direction='sendrecv'
+    peerConnection.getTransceivers().forEach(t=>{
+      t.direction='sendrecv';
+    });
 }
 function sendOnly() {
   // console.log('sendOnly, state : ', peerConnection.connectionState);
   // if(peerConnection.connectionState === 'connected') {
-  console.log('videoTransceiver : ', localTransceiver);
-  localTransceiver.direction='sendonly';
-    
+  // console.log('videoTransceiver : ', localTransceiver);
+  // localTransceiver.direction='sendonly';
+  peerConnection.getTransceivers().forEach(t=>{
+    t.direction='sendonly';
+  });
   // }
 }
 function recvOnly() {
@@ -165,10 +164,13 @@ function recvOnly() {
     // peerConnection.addTransceiver('video', {direction:'recvonly'});
     // peerConnection.getTransceivers().forEach(t=>{
     //   console.log('direction change, transceiver : ', t);
-  console.log('videoTransceiver : ', localTransceiver);
-  localTransceiver.direction='recvonly';
+  // console.log('videoTransceiver : ', localTransceiver);
+  // localTransceiver.direction='recvonly';
     // });
   // }
+  peerConnection.getTransceivers().forEach(t=>{
+    t.direction='recvonly';
+  });
 }
 
 async function joinRoomById(roomId) {
@@ -183,9 +185,9 @@ async function joinRoomById(roomId) {
     registerPeerConnectionListeners();
     enableDirectionButton();
     
-    // localStream.getTracks().forEach(track => {
-    //   peerConnection.addTrack(track, localStream);
-    // });
+    localStream.getTracks().forEach(track => {
+      peerConnection.addTrack(track, localStream);
+    });
 
     // Code for collecting ICE candidates below
     const calleeCandidatesCollection = roomRef.collection('calleeCandidates');
@@ -201,12 +203,12 @@ async function joinRoomById(roomId) {
 
     peerConnection.addEventListener('track', event => {
       console.log('Got remote track:', event);
-      remoteStream.addTrack(event.transceiver.receiver.track);
-      console.log('Add a track to the remoteStream:', event.transceiver.receiver.track);
-      // event.streams[0].getTracks().forEach(track => {
-      //   console.log('Add a track to the remoteStream:', track);
-      //   remoteStream.addTrack(track);
-      // });
+      // remoteStream.addTrack(event.transceiver.receiver.track);
+      // console.log('Add a track to the remoteStream:', event.transceiver.receiver.track);
+      event.streams[0].getTracks().forEach(track => {
+        console.log('Add a track to the remoteStream:', track);
+        remoteStream.addTrack(track);
+      });
     });
 
     // Code for creating SDP answer below
@@ -217,11 +219,11 @@ async function joinRoomById(roomId) {
     console.log('Created answer:', answer);
     await peerConnection.setLocalDescription(answer);
 
-    localTransceiver = peerConnection.addTransceiver(localStream.getVideoTracks()[0]);
-    console.log('localTransceiver : ', localTransceiver);
-    localTransceiver.receiver.track.onmute = () => console.log("transceiver.receiver.track.onmute");
-    localTransceiver.receiver.track.onended = () => console.log("transceiver.receiver.track.onended");
-    localTransceiver.receiver.track.onunmute = () => console.log("transceiver.receiver.track.onunmute");
+    // localTransceiver = peerConnection.addTransceiver(localStream.getVideoTracks()[0]);
+    // console.log('localTransceiver : ', localTransceiver);
+    // localTransceiver.receiver.track.onmute = () => console.log("transceiver.receiver.track.onmute");
+    // localTransceiver.receiver.track.onended = () => console.log("transceiver.receiver.track.onended");
+    // localTransceiver.receiver.track.onunmute = () => console.log("transceiver.receiver.track.onunmute");
 
     const roomWithAnswer = {
       answer: {
@@ -329,10 +331,19 @@ function registerPeerConnectionListeners() {
         `ICE connection state change: ${peerConnection.iceConnectionState}`);
   });
 
-  peerConnection.addEventListener('negotiationneeded', (e) => {
-    console.log(`Peerconnection negotiationneeded event: ${e}`);
-    peerConnection.createOffer()
-      .then(offer=>peerConnection.setLocalDescription(offer));
+  peerConnection.addEventListener('negotiationneeded', async (e) => {
+    console.log('Peerconnection negotiationneeded event: ', e);
+    // const offer = await peerConnection.createOffer()
+    // await peerConnection.setLocalDescription(offer);
+    // const roomWithOffer = {
+    //   'offer': {
+    //     type: offer.type,
+    //     sdp: offer.sdp,
+    //   },
+    // };
+    // const db = firebase.firestore();
+    // const roomRef = await db.collection('rooms').doc();
+    // await roomRef.set(roomWithOffer);
   });
 }
 
