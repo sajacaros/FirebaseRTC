@@ -44,7 +44,7 @@ async function createRoom() {
   enableDirectionButton();
   registerPeerConnectionListeners();
 
-  localTransceiver = peerConnection.addTransceiver(localStream.getTracks()[0]);
+  localTransceiver = peerConnection.addTransceiver(localStream.getVideoTracks()[0]);
   localTransceiver.receiver.track.onmute = () => console.log("transceiver.receiver.track.onmute");
   localTransceiver.receiver.track.onended = () => console.log("transceiver.receiver.track.onended");
   localTransceiver.receiver.track.onunmute = () => console.log("transceiver.receiver.track.onunmute");
@@ -87,11 +87,13 @@ async function createRoom() {
   peerConnection.addEventListener('track', event => {
     console.log('Got remote track:', event);
     
-    event.streams[0].getTracks().forEach(track => {
-      console.log('Add a track to the remoteStream:', track);
+    remoteStream.addTrack([event.transceiver.receiver.track]);
+    console.log('Add a track to the remoteStream:', event.transceiver.receiver.track);
+    // event.streams[0].getTracks().forEach(track => {
+    //   console.log('Add a track to the remoteStream:', track);
       
-      remoteStream.addTrack(track);
-    });
+    //   remoteStream.addTrack(track);
+    // });
   });
 
   // Listening for remote session description below
@@ -177,7 +179,7 @@ async function joinRoomById(roomId) {
     peerConnection = new RTCPeerConnection(configuration);
     registerPeerConnectionListeners();
     enableDirectionButton();
-    localTransceiver = peerConnection.addTransceiver(localStream.getTracks()[0]);
+    localTransceiver = peerConnection.addTransceiver(localStream.getVideoTracks()[0]);
     localTransceiver.receiver.track.onmute = () => console.log("transceiver.receiver.track.onmute");
     localTransceiver.receiver.track.onended = () => console.log("transceiver.receiver.track.onended");
     localTransceiver.receiver.track.onunmute = () => console.log("transceiver.receiver.track.onunmute");
@@ -199,10 +201,12 @@ async function joinRoomById(roomId) {
 
     peerConnection.addEventListener('track', event => {
       console.log('Got remote track:', event);
-      event.streams[0].getTracks().forEach(track => {
-        console.log('Add a track to the remoteStream:', track);
-        remoteStream.addTrack(track);
-      });
+      remoteStream.addTrack([event.transceiver.receiver.track]);
+      console.log('Add a track to the remoteStream:', event.transceiver.receiver.track);
+      // event.streams[0].getTracks().forEach(track => {
+      //   console.log('Add a track to the remoteStream:', track);
+      //   remoteStream.addTrack(track);
+      // });
     });
 
     // Code for creating SDP answer below
