@@ -378,17 +378,18 @@ function registerPeerConnectionListeners(roomId) {
       const offer = snapshot.data().offerNego;
       console.log('Got nego offer:', offer);
       await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
-      const answer = await peerConnection.createAnswer();
-      console.log('Created nego answer:', answer);
-      await peerConnection.setLocalDescription(answer);
-      const roomWithAnswer = {
-        answerNego: {
-          type: answer.type,
-          sdp: answer.sdp,
-        },
-      };
-      setTimeout(()=>roomRef.update(roomWithAnswer), 100);
     }
+  }, err=>console.log(err), ()=>{
+    const answer = await peerConnection.createAnswer();
+    console.log('Created nego answer:', answer);
+    await peerConnection.setLocalDescription(answer);
+    const roomWithAnswer = {
+      answerNego: {
+        type: answer.type,
+        sdp: answer.sdp,
+      },
+    };
+    roomRef.update(roomWithAnswer);
   });
 }
 
