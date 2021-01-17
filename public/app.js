@@ -379,7 +379,7 @@ function registerPeerConnectionListeners(roomId) {
       console.log('Got nego offer:', offer);
       await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
     }
-  }, err=>console.log(err), ()=>{
+  }, err=>console.log(err), async ()=>{
     const answer = await peerConnection.createAnswer();
     console.log('Created nego answer:', answer);
     await peerConnection.setLocalDescription(answer);
