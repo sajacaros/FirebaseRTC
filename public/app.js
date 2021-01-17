@@ -372,7 +372,7 @@ function registerPeerConnectionListeners(roomId) {
       }
     });
   });
-  roomRef.onSnapshot(async snapshot => {
+  const unsubscribe = roomRef.onSnapshot(async snapshot => {
     if (!negoState && snapshot.data() && snapshot.data().offerNego) {
       const offer = snapshot.data().offerNego;
       console.log('Got nego offer:', offer);
@@ -387,6 +387,7 @@ function registerPeerConnectionListeners(roomId) {
         },
       };
       await roomRef.update(roomWithAnswer);
+      unsubscribe();
     }
   });
 }
