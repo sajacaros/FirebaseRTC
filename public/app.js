@@ -20,6 +20,7 @@ let roomDialog = null;
 let roomId = null;
 let localTransceiver = null;
 let remoteTransceiver = null;
+let negotiationState = null;
 
 function init() {
   document.querySelector('#cameraBtn').addEventListener('click', openUserMedia);
@@ -335,6 +336,9 @@ function registerPeerConnectionListeners(roomId) {
 
   peerConnection.addEventListener('signalingstatechange', () => {
     console.log(`Signaling state change: ${peerConnection.signalingState}`);
+    if(peerConnection.signalingState === 'stable') {
+      negotiationState = null;
+    }
   });
 
   peerConnection.addEventListener('iceconnectionstatechange', () => {
@@ -344,13 +348,12 @@ function registerPeerConnectionListeners(roomId) {
 
   const db = firebase.firestore();
   const roomRef = db.collection('rooms').doc(`${roomId}`);
-  let negoState = null;
+
   peerConnection.addEventListener('negotiationneeded', async (e) => {
     if(!peerConnection.currentRemoteDescription) {
-      console.log('why???');
       return;
     }
-    negoState = 'offer'
+    negotiationState = 'offer'
     console.log('Peerconnection negotiationneeded event: ', e);
     const offer = await peerConnection.createOffer()
     await peerConnection.setLocalDescription(offer);
@@ -369,27 +372,26 @@ function registerPeerConnectionListeners(roomId) {
         const rtcSessionDescription = new RTCSessionDescription(data.answerNego);
         await peerConnection.setRemoteDescription(rtcSessionDescription);
         unsubscribe();
-        negostate = null;
       }
     });
   });
-  const unsubscribe = roomRef.onSnapshot(async snapshot => {
+  roomRef.onSnapshot(async snapshot => {
     if (!negoState && snapshot.data() && snapshot.data().offerNego) {
+      negoState = 'answer';
       const offer = snapshot.data().offerNego;
       console.log('Got nego offer:', offer);
       await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+      const answer = await peerConnection.createAnswer();
+      console.log('Created nego answer:', answer);
+      await peerConnection.setLocalDescription(answer);
+      const roomWithAnswer = {
+        answerNego: {
+          type: answer.type,
+          sdp: answer.sdp,
+        },
+      };
+      roomRef.update(roomWithAnswer);
     }
-  }, err=>console.log(err), async ()=>{
-    const answer = await peerConnection.createAnswer();
-    console.log('Created nego answer:', answer);
-    await peerConnection.setLocalDescription(answer);
-    const roomWithAnswer = {
-      answerNego: {
-        type: answer.type,
-        sdp: answer.sdp,
-      },
-    };
-    roomRef.update(roomWithAnswer);
   });
 }
 
