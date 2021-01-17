@@ -40,9 +40,11 @@ async function createRoom() {
 
   console.log('Create PeerConnection with configuration: ', configuration);
   peerConnection = new RTCPeerConnection(configuration);
-
+  console.log('-1');
   enableDirectionButton();
   registerPeerConnectionListeners();
+
+  console.log('0');
 
   // console.log('0');
   // peerConnection.addTransceiver(localStream.getVideoTracks()[0]);
@@ -67,9 +69,7 @@ async function createRoom() {
   // Code for collecting ICE candidates above
 
   // Code for creating a room below
-  console.log('2');
   const offer = await peerConnection.createOffer();
-  console.log('3');
   await peerConnection.setLocalDescription(offer);
   console.log('Created offer:', offer);
 
@@ -190,7 +190,7 @@ async function joinRoomById(roomId) {
   if (roomSnapshot.exists) {
     console.log('Create PeerConnection with configuration: ', configuration);
     peerConnection = new RTCPeerConnection(configuration);
-    registerPeerConnectionListeners();
+    registerPeerConnectionListeners(roomId);
     enableDirectionButton();
     
     localStream.getTracks().forEach(track => {
@@ -323,7 +323,7 @@ function enableDirectionButton() {
   document.querySelector('#recvonlyBtn').disabled = false;
 }
 
-function registerPeerConnectionListeners() {
+function registerPeerConnectionListeners(roomId) {
   peerConnection.addEventListener('icegatheringstatechange', () => {
     console.log(
         `ICE gathering state changed: ${peerConnection.iceGatheringState}`);
@@ -342,19 +342,49 @@ function registerPeerConnectionListeners() {
         `ICE connection state change: ${peerConnection.iceConnectionState}`);
   });
 
+  const db = firebase.firestore();
+  const roomRef = db.collection('rooms').doc(`${roomId}`);
   peerConnection.addEventListener('negotiationneeded', async (e) => {
+    if(!peerConnection.currentRemoteDescription) {
+      return;
+    }
     console.log('Peerconnection negotiationneeded event: ', e);
-    // const offer = await peerConnection.createOffer()
-    // await peerConnection.setLocalDescription(offer);
-    // const roomWithOffer = {
-    //   'offer': {
-    //     type: offer.type,
-    //     sdp: offer.sdp,
-    //   },
-    // };
-    // const db = firebase.firestore();
-    // const roomRef = await db.collection('rooms').doc();
-    // await roomRef.set(roomWithOffer);
+    const offer = await peerConnection.createOffer()
+    await peerConnection.setLocalDescription(offer);
+    const roomWithOffer = {
+      'offerNego': {
+        type: offer.type,
+        sdp: offer.sdp,
+      },
+    };
+
+    await roomRef.update(roomWithOffer);
+    const unsubscribe = roomRef.onSnapshot(async snapshot => {
+      const data = snapshot.data();
+      if (data && data.answerNego) {
+        console.log('Got remote negoation description: ', data.answerNego);
+        const rtcSessionDescription = new RTCSessionDescription(data.answerNego);
+        await peerConnection.setRemoteDescription(rtcSessionDescription);
+        unsubscribe();
+      }
+    });
+  });
+  roomRef.onSnapshot(async snapshot => {
+    if (snapshot.data() && snapshot.data().offerNego) {
+      const offer = snapshot.data().offerNego;
+      console.log('Got nego offer:', offer);
+      await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+      const answer = await peerConnection.createAnswer();
+      console.log('Created nego answer:', answer);
+      await peerConnection.setLocalDescription(answer);
+      const roomWithAnswer = {
+        answerNego: {
+          type: answer.type,
+          sdp: answer.sdp,
+        },
+      };
+      await roomRef.update(roomWithAnswer);
+    }
   });
 }
 
