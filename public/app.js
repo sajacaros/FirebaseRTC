@@ -20,7 +20,7 @@ let roomDialog = null;
 let roomId = null;
 let localTransceiver = null;
 let remoteTransceiver = null;
-let negotiationState = null;
+let isNegoDone = true;
 
 function init() {
   document.querySelector('#cameraBtn').addEventListener('click', openUserMedia);
@@ -108,7 +108,7 @@ async function createRoom() {
       console.log('stream.onaddtrack, transceiver : ', event.transceiver);
     }
     event.streams[0].onremovetrack = () => console.log("stream.onremovetrack");
-    transceiver.receiver.track.onmute = () => {
+    event.transceiver.receiver.track.onmute = () => {
       console.log('transceiver.receiver.track.onmute, transceiver : ', event.transceiver);
     }
     event.transceiver.receiver.track.onended = () => console.log("transceiver.receiver.track.onended");
@@ -354,7 +354,7 @@ function registerPeerConnectionListeners(roomId) {
     if(!peerConnection.currentRemoteDescription) {
       return;
     }
-    negotiationState = 'offer'
+    isNegoDone = false
     console.log('Peerconnection negotiationneeded event: ', e);
     const offer = await peerConnection.createOffer()
     await peerConnection.setLocalDescription(offer);
@@ -373,12 +373,13 @@ function registerPeerConnectionListeners(roomId) {
         const rtcSessionDescription = new RTCSessionDescription(data.answerNego);
         await peerConnection.setRemoteDescription(rtcSessionDescription);
         unsubscribe();
+        isNegoDone = true;
       }
     });
   });
   roomRef.onSnapshot(async snapshot => {
-    if (!negotiationState && snapshot.data() && snapshot.data().offerNego) {
-      negotiationState = 'answer';
+    if (!isNegoDone && snapshot.data() && snapshot.data().offerNego) {
+      isNegoDone = false;
       const offer = snapshot.data().offerNego;
       console.log('Got nego offer:', offer);
       await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
@@ -392,7 +393,7 @@ function registerPeerConnectionListeners(roomId) {
         },
       };
       roomRef.update(roomWithAnswer);
-      setTimeout(()=>{negotiationState = null}, 2000);
+      setTimeout(()=>{isNegoDone = true}, 500);
     }
   });
 }
