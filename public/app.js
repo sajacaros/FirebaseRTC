@@ -41,17 +41,10 @@ async function createRoom() {
 
   console.log('Create PeerConnection with configuration: ', configuration);
   peerConnection = new RTCPeerConnection(configuration);
-  console.log('-1');
   enableDirectionButton();
   registerPeerConnectionListeners(roomRef.id);
 
-  console.log('0');
-
-  // console.log('0');
-  // peerConnection.addTransceiver(localStream.getVideoTracks()[0]);
-  // console.log('1');
   localStream.getTracks().forEach(track => {
-    console.log('1');
     peerConnection.addTrack(track, localStream);
     // peerConnection.addTransceiver(track, localStream);
   });
