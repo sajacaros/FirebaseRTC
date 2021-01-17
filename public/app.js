@@ -42,7 +42,7 @@ async function createRoom() {
   peerConnection = new RTCPeerConnection(configuration);
   console.log('-1');
   enableDirectionButton();
-  registerPeerConnectionListeners();
+  registerPeerConnectionListeners(roomRef.id);
 
   console.log('0');
 
