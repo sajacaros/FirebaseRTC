@@ -366,6 +366,10 @@ function registerPeerConnectionListeners(roomId) {
         const rtcSessionDescription = new RTCSessionDescription(data.answerNego);
         await peerConnection.setRemoteDescription(rtcSessionDescription);
         unsubscribe();
+        roomRef.update({
+          offerNego: firebase.firestore.FieldValue.delete(),
+          answerNego: firebase.firestore.FieldValue.delete()
+        });
         isNegoDone = true;
       }
     });
