@@ -376,8 +376,8 @@ function registerPeerConnectionListeners(roomId) {
     });
   });
   roomRef.onSnapshot(async snapshot => {
-    if (!negoState && snapshot.data() && snapshot.data().offerNego) {
-      negoState = 'answer';
+    if (!negotiationState && snapshot.data() && snapshot.data().offerNego) {
+      negotiationState = 'answer';
       const offer = snapshot.data().offerNego;
       console.log('Got nego offer:', offer);
       await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
