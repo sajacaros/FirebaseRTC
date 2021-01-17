@@ -315,7 +315,7 @@ async function hangUp(e) {
     await roomRef.delete();
   }
 
-  document.location.reload();
+  // document.location.reload();
 }
 
 function enableDirectionButton() {
@@ -336,9 +336,6 @@ function registerPeerConnectionListeners(roomId) {
 
   peerConnection.addEventListener('signalingstatechange', () => {
     console.log(`Signaling state change: ${peerConnection.signalingState}`);
-    if(peerConnection.signalingState === 'stable') {
-      negotiationState = null;
-    }
   });
 
   peerConnection.addEventListener('iceconnectionstatechange', () => {
@@ -391,6 +388,7 @@ function registerPeerConnectionListeners(roomId) {
         },
       };
       roomRef.update(roomWithAnswer);
+      setTimeout(()=>{negotiationState = null}, 2000);
     }
   });
 }
