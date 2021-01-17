@@ -378,7 +378,7 @@ function registerPeerConnectionListeners(roomId) {
     });
   });
   roomRef.onSnapshot(async snapshot => {
-    if (!isNegoDone && snapshot.data() && snapshot.data().offerNego) {
+    if (isNegoDone && snapshot.data() && snapshot.data().offerNego) {
       isNegoDone = false;
       const offer = snapshot.data().offerNego;
       console.log('Got nego offer:', offer);
