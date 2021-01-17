@@ -344,7 +344,7 @@ function registerPeerConnectionListeners(roomId) {
 
   const db = firebase.firestore();
   const roomRef = db.collection('rooms').doc(`${roomId}`);
-  const negoState = null;
+  let negoState = null;
   peerConnection.addEventListener('negotiationneeded', async (e) => {
     if(!peerConnection.currentRemoteDescription) {
       return;
