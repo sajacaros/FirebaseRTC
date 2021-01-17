@@ -387,7 +387,7 @@ function registerPeerConnectionListeners(roomId) {
           sdp: answer.sdp,
         },
       };
-      roomRef.update(roomWithAnswer);
+      setTimeout(()=>roomRef.update(roomWithAnswer), 100);
     }
   });
 }
