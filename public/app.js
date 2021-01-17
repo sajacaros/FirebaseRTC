@@ -103,6 +103,18 @@ async function createRoom() {
       
       remoteStream.addTrack(track);
     });
+
+    event.streams[0].onaddtrack = () => {
+      console.log('stream.onaddtrack, transceiver : ', event.transceiver);
+    }
+    event.streams[0].onremovetrack = () => console.log("stream.onremovetrack");
+    transceiver.receiver.track.onmute = () => {
+      console.log('transceiver.receiver.track.onmute, transceiver : ', event.transceiver);
+    }
+    event.transceiver.receiver.track.onended = () => console.log("transceiver.receiver.track.onended");
+    event.transceiver.receiver.track.onunmute = () => {
+      console.log("onunmute, transceiver.receiver.track.onunmute");
+    };
   });
 
   // Listening for remote session description below
@@ -134,48 +146,29 @@ function joinRoom() {
   document.querySelector('#joinBtn').disabled = true;
 
   document.querySelector('#confirmJoinBtn').
-      addEventListener('click', async () => {
-        roomId = document.querySelector('#room-id').value;
-        console.log('Join room: ', roomId);
-        document.querySelector(
-            '#currentRoom').innerText = `Current room is ${roomId} - You are the callee!`;
-        await joinRoomById(roomId);
-      }, {once: true});
+    addEventListener('click', async () => {
+      roomId = document.querySelector('#room-id').value;
+      console.log('Join room: ', roomId);
+      document.querySelector(
+          '#currentRoom').innerText = `Current room is ${roomId} - You are the callee!`;
+      await joinRoomById(roomId);
+    }, {once: true});
   roomDialog.open();
 }
 
 function sendRecv() {
-  // console.log('sendRecv, state : ', peerConnection.connectionState);
-  
-  // if(peerConnection.connectionState === 'connected') {
-  // console.log('videoTransceiver : ', localTransceiver);  
-  // localTransceiver.direction='sendrecv'
-    peerConnection.getTransceivers().forEach(t=>{
-      console.log('sendrecv tramsceiver : ', t);
-      t.direction='sendrecv';
-    });
+  peerConnection.getTransceivers().forEach(t=>{
+    console.log('sendrecv tramsceiver : ', t);
+    t.direction='sendrecv';
+  });
 }
 function sendOnly() {
-  // console.log('sendOnly, state : ', peerConnection.connectionState);
-  // if(peerConnection.connectionState === 'connected') {
-  // console.log('videoTransceiver : ', localTransceiver);
-  // localTransceiver.direction='sendonly';
   peerConnection.getTransceivers().forEach(t=>{
     console.log('sendonly tramsceiver : ', t);
     t.direction='sendonly';
   });
-  // }
 }
 function recvOnly() {
-  // console.log('recvOnly, state : ', peerConnection.connectionState);
-  // if(peerConnection.connectionState === 'connected') {
-    // peerConnection.addTransceiver('video', {direction:'recvonly'});
-    // peerConnection.getTransceivers().forEach(t=>{
-    //   console.log('direction change, transceiver : ', t);
-  // console.log('videoTransceiver : ', localTransceiver);
-  // localTransceiver.direction='recvonly';
-    // });
-  // }
   peerConnection.getTransceivers().forEach(t=>{
     console.log('recvonly tramsceiver : ', t);
     t.direction='recvonly';
@@ -221,6 +214,18 @@ async function joinRoomById(roomId) {
         console.log('Add a track to the remoteStream:', track);
         remoteStream.addTrack(track);
       });
+
+      event.streams[0].onaddtrack = () => {
+        console.log('stream.onaddtrack, transceiver : ', event.transceiver);
+      }
+      event.streams[0].onremovetrack = () => console.log("stream.onremovetrack");
+      event.transceiver.receiver.track.onmute = () => {
+        console.log('transceiver.receiver.track.onmute, transceiver : ', event.transceiver);
+      }
+      event.transceiver.receiver.track.onended = () => console.log("transceiver.receiver.track.onended");
+      event.transceiver.receiver.track.onunmute = () => {
+        console.log("onunmute, transceiver.receiver.track.onunmute");
+      };
     });
 
     // Code for creating SDP answer below
@@ -261,8 +266,7 @@ async function joinRoomById(roomId) {
 }
 
 async function openUserMedia(e) {
-  const stream = await navigator.mediaDevices.getUserMedia(
-      {video: true, audio: true});
+  const stream = await navigator.mediaDevices.getUserMedia({video: true});
   document.querySelector('#localVideo').srcObject = stream;
   localStream = stream;
   remoteStream = new MediaStream();
