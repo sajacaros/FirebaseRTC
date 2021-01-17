@@ -344,10 +344,12 @@ function registerPeerConnectionListeners(roomId) {
 
   const db = firebase.firestore();
   const roomRef = db.collection('rooms').doc(`${roomId}`);
+  const negoState = null;
   peerConnection.addEventListener('negotiationneeded', async (e) => {
     if(!peerConnection.currentRemoteDescription) {
       return;
     }
+    negoState = 'offer'
     console.log('Peerconnection negotiationneeded event: ', e);
     const offer = await peerConnection.createOffer()
     await peerConnection.setLocalDescription(offer);
@@ -366,11 +368,12 @@ function registerPeerConnectionListeners(roomId) {
         const rtcSessionDescription = new RTCSessionDescription(data.answerNego);
         await peerConnection.setRemoteDescription(rtcSessionDescription);
         unsubscribe();
+        negostate = null;
       }
     });
   });
   roomRef.onSnapshot(async snapshot => {
-    if (snapshot.data() && snapshot.data().offerNego) {
+    if (!negoState && snapshot.data() && snapshot.data().offerNego) {
       const offer = snapshot.data().offerNego;
       console.log('Got nego offer:', offer);
       await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
