@@ -347,6 +347,7 @@ function registerPeerConnectionListeners(roomId) {
   let negoState = null;
   peerConnection.addEventListener('negotiationneeded', async (e) => {
     if(!peerConnection.currentRemoteDescription) {
+      console.log('why???');
       return;
     }
     negoState = 'offer'
@@ -386,8 +387,7 @@ function registerPeerConnectionListeners(roomId) {
           sdp: answer.sdp,
         },
       };
-      await roomRef.update(roomWithAnswer);
-      unsubscribe();
+      roomRef.update(roomWithAnswer);
     }
   });
 }
