@@ -21,6 +21,7 @@ let roomId = null;
 let localTransceiver = null;
 let remoteTransceiver = null;
 let isNegoDone = true;
+const initialRoomNumber = 10000;
 
 function init() {
   document.querySelector('#cameraBtn').addEventListener('click', openUserMedia);
@@ -37,14 +38,15 @@ async function createRoom() {
   document.querySelector('#createBtn').disabled = true;
   document.querySelector('#joinBtn').disabled = true;
   const db = firebase.firestore();
-  const roomNumberRef = await db.collection('rooms').doc('number');
+  const roomNumberRef = await db.collection('roomNumber').doc('number');
   const increment = firebase.firestore.FieldValue.increment(1);
-  let roomNumber = 1000;
+  let roomNumber;
   const roomNumberDoc = await roomNumberRef.get();
   if (roomNumberDoc.exists) {
-    await roomNumberRef.update({current:increment});  
-    roomNumber = roomNumberDoc.data().roomNumber;
+    await roomNumberRef.update({current:increment});
+    roomNumber = roomNumberDoc.data().current;
   } else {
+    roomNumber = initialRoomNumber;
     await roomNumberRef.set({current:roomNumber});
   }
 
@@ -286,6 +288,13 @@ async function openUserMedia(e) {
   document.querySelector('#hangupBtn').disabled = false;
 }
 
+async function cleanRoom(roomRef, element) {
+  const candidateElements = await roomRef.collection(element).get();
+  candidateElements.forEach(async candidate => {
+    await candidate.ref.delete();
+  });
+}
+
 async function hangUp(e) {
   const tracks = document.querySelector('#localVideo').srcObject.getTracks();
   tracks.forEach(track => {
@@ -315,14 +324,8 @@ async function hangUp(e) {
   if (roomId) {
     const db = firebase.firestore();
     const roomRef = db.collection('rooms').doc(roomId);
-    const calleeCandidates = await roomRef.collection('calleeCandidates').get();
-    calleeCandidates.forEach(async candidate => {
-      await candidate.ref.delete();
-    });
-    const callerCandidates = await roomRef.collection('callerCandidates').get();
-    callerCandidates.forEach(async candidate => {
-      await candidate.ref.delete();
-    });
+    cleanRoom(roomRef, 'calleeCandidates');
+    cleanRoom(roomRef, 'callerCandidates');
     await roomRef.delete();
   }
 
