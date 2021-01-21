@@ -33,7 +33,7 @@ function init() {
   document.querySelector('#recvonlyBtn').addEventListener('click', recvOnly);
   roomDialog = new mdc.dialog.MDCDialog(document.querySelector('#room-dialog'));
 }
- 
+
 async function createRoom() {
   document.querySelector('#createBtn').disabled = true;
   document.querySelector('#joinBtn').disabled = true;
