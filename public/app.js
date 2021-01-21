@@ -37,7 +37,20 @@ async function createRoom() {
   document.querySelector('#createBtn').disabled = true;
   document.querySelector('#joinBtn').disabled = true;
   const db = firebase.firestore();
-  const roomRef = await db.collection('rooms').doc();
+  const roomNumberRef = await db.collection('rooms').doc('number');
+  const increment = firebase.firestore.FieldValue.increment(1);
+  let roomNumber = 1000;
+  const roomNumberDoc = await roomNumberRef.get();
+  if (roomNumberDoc.exists) {
+    await roomNumberRef.update({current:increment});  
+    roomNumber = roomNumberDoc.data().roomNumber;
+  } else {
+    await roomNumberRef.set({current:roomNumber});
+  }
+
+  console.log('roomNumber : ', roomNumber);
+
+  const roomRef = await db.collection('rooms').doc(`${roomNumber}`);
 
   console.log('Create PeerConnection with configuration: ', configuration);
   peerConnection = new RTCPeerConnection(configuration);
@@ -50,6 +63,7 @@ async function createRoom() {
   });
 
   // Code for collecting ICE candidates below
+
   const callerCandidatesCollection = roomRef.collection('callerCandidates');
 
   peerConnection.addEventListener('icecandidate', event => {
