@@ -61,7 +61,7 @@ function receiveChannelCallback(event) {
   }
 }
 
-receiveFile = ({data}) => {
+onReceiveMessageCallback = ({data}) => {
   if(downloadInProgress=== false) {
     incomingFileInfo = JSON.parse( data.toString() );
     console.log(`${incomingFileInfo.fileName} : ${incomingFileInfo.fileSize}`);
@@ -86,6 +86,11 @@ receiveFile = ({data}) => {
       fileRecvEnd();
     }
   }
+}
+
+async function onReceiveChannelStateChange() {
+  const readyState = receiveChannel.readyState;
+  console.log(`Receive channel state is: ${readyState}`);
 }
 
 function fileRecvEnd() {
