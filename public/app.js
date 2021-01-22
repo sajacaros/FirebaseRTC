@@ -1,3 +1,12 @@
+import sendFile from './WebrtcFileSender';
+
+const fileInput = document.querySelector('input#fileInput');
+const sendFileButton = document.querySelector('button#sendFile');
+const abortButton = document.querySelector('button#abortButton');
+
+let receiveBuffer = [];
+let receivedSize = 0;
+
 mdc.ripple.MDCRipple.attachTo(document.querySelector('.mdc-button'));
 
 const configuration = {
@@ -31,6 +40,7 @@ function init() {
   document.querySelector('#sendrecvBtn').addEventListener('click', sendRecv);
   document.querySelector('#sendonlyBtn').addEventListener('click', sendOnly);
   document.querySelector('#recvonlyBtn').addEventListener('click', recvOnly);
+  fileInput.addEventListener('change', handleFileInputChange, false);
   roomDialog = new mdc.dialog.MDCDialog(document.querySelector('#room-dialog'));
 }
 
@@ -79,6 +89,7 @@ async function createRoom() {
   // Code for collecting ICE candidates above
 
   // Code for creating a room below
+  sendChannel = peerConnection.createDataChannel('sendDataChannel');
   const offer = await peerConnection.createOffer();
   await peerConnection.setLocalDescription(offer);
   console.log('Created offer:', offer);
@@ -241,6 +252,7 @@ async function joinRoomById(roomId) {
     const offer = roomSnapshot.data().offer;
     console.log('Got offer:', offer);
     await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+    sendChannel = peerConnection.createDataChannel('sendDataChannel');
     const answer = await peerConnection.createAnswer();
     console.log('Created answer:', answer);
     await peerConnection.setLocalDescription(answer);
@@ -366,6 +378,7 @@ function registerPeerConnectionListeners(roomId) {
     }
     isNegoDone = false
     console.log('Peerconnection negotiationneeded event: ', e);
+    sendChannel = peerConnection.createDataChannel('sendDataChannel');
     const offer = await peerConnection.createOffer()
     await peerConnection.setLocalDescription(offer);
     const roomWithOffer = {
@@ -411,5 +424,35 @@ function registerPeerConnectionListeners(roomId) {
     }
   });
 }
+
+const initialize = () => {
+  console.log('init file send');
+
+  fileInput.disabled = false;
+  abortButton.disabled = true;
+  sendFileButton.disabled = true;
+  
+  receiveBuffer = [];
+  receivedSize = 0;
+}
+
+function handleFileInputChange() {
+  const file = fileInput.files[0];
+  if (!file) {
+    console.log('No file chosen');
+    sendFileButton.removeEventListener('click');
+  } else {
+    sendFileButton.disabled = false;
+    sendFileButton.addEventListener('click', () => {
+      const fileSendPromise = sendData(sendChannel, file)
+      fileSendPromise.then(
+        ()=>initialize(), 
+        e=>logger.error('file send failed, error : ', e)
+      );
+    });
+  }
+}
+
+
 
 init();
