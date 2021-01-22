@@ -430,14 +430,12 @@ const fileSendInitialize = () => {
   fileInput.value = null;
   fileInput.disabled = false;
   sendFileButton.disabled = true;
-  sendFileButton.removeEventListener('click');
 }
 
 function handleFileInputChange() {
   const file = fileInput.files[0];
   if (!file) {
     console.log('No file chosen');
-    sendFileButton.removeEventListener('click');
   } else {
     sendFileButton.disabled = false;
     sendFileButton.addEventListener('click', () => {
@@ -446,7 +444,7 @@ function handleFileInputChange() {
         ()=>fileSendInitialize(), 
         e=>console.error('file send failed, error : ', e)
       );
-    });
+    }, {once:true});
   }
 }
 
