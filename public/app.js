@@ -1,6 +1,5 @@
 const fileInput = document.querySelector('input#fileInput');
 const sendFileButton = document.querySelector('button#sendFile');
-const abortButton = document.querySelector('button#abortButton');
 
 let receiveBuffer = [];
 let receivedSize = 0;
@@ -431,8 +430,8 @@ function registerPeerConnectionListeners(roomId) {
 const fileSendInitialize = () => {
   console.log('init file send');
 
+  fileInput.value = null;
   fileInput.disabled = false;
-  abortButton.disabled = true;
   sendFileButton.disabled = true;
   
   receiveBuffer = [];
