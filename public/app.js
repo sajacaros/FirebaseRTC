@@ -1,5 +1,3 @@
-import sendFile from './WebrtcFileSender';
-
 const fileInput = document.querySelector('input#fileInput');
 const sendFileButton = document.querySelector('button#sendFile');
 const abortButton = document.querySelector('button#abortButton');
@@ -42,6 +40,7 @@ function init() {
   document.querySelector('#recvonlyBtn').addEventListener('click', recvOnly);
   fileInput.addEventListener('change', handleFileInputChange, false);
   roomDialog = new mdc.dialog.MDCDialog(document.querySelector('#room-dialog'));
+  fileInput.disabled = true;
 }
 
 async function createRoom() {
@@ -159,6 +158,7 @@ async function createRoom() {
     });
   });
   // Listen for remote ICE candidates above
+  fileSendInitialize();
 }
 
 function joinRoom() {
@@ -284,6 +284,7 @@ async function joinRoomById(roomId) {
     });
     // Listening for remote ICE candidates above
   }
+  fileSendInitialize();
 }
 
 async function openUserMedia(e) {
@@ -369,6 +370,11 @@ function registerPeerConnectionListeners(roomId) {
         `ICE connection state change: ${peerConnection.iceConnectionState}`);
   });
 
+  peerConnection.addEventListener('datachannel', ()=>{
+    const {fileName, fileSize} = receiveFile();
+    console.log(`recv fileName ${fileName}, size : ${fileSzie}`);
+  });
+
   const db = firebase.firestore();
   const roomRef = db.collection('rooms').doc(`${roomId}`);
 
@@ -425,7 +431,7 @@ function registerPeerConnectionListeners(roomId) {
   });
 }
 
-const initialize = () => {
+const fileSendInitialize = () => {
   console.log('init file send');
 
   fileInput.disabled = false;
@@ -444,10 +450,10 @@ function handleFileInputChange() {
   } else {
     sendFileButton.disabled = false;
     sendFileButton.addEventListener('click', () => {
-      const fileSendPromise = sendData(sendChannel, file)
+      const fileSendPromise = sendFile(sendChannel, file)
       fileSendPromise.then(
-        ()=>initialize(), 
-        e=>logger.error('file send failed, error : ', e)
+        ()=>fileSendInitialize(), 
+        e=>console.error('file send failed, error : ', e)
       );
     });
   }

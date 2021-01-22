@@ -86,7 +86,21 @@
         </div>
     </div>
     <div class="mdc-dialog__scrim"></div>
-</div>
+  </div>
+  
+  <section>
+    <div >
+      <form id="fileInfo">
+        <input type="file" id="fileInput" name="files"/>
+      </form>
+      <button disabled id="sendFile">Send</button>
+      <button disabled id="abortButton">Abort</button>
+    </div>
+
+    
+    <a id="download"></a>
+  </section>
 <script src="app.js"></script>
+<script src="WebrtcFileSender.js"></script>
 </body>
 </html>

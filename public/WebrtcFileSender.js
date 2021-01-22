@@ -8,8 +8,8 @@ const readSlice = (file, currentOffset) => {
   fileReader.readAsArrayBuffer(slice);
 };
 
-const sendData = (channel, file) => {
-  return new Promise(function(resolve, reject) {
+const sendFile = (channel, file) => {
+  return new Promise((resolve, reject) => {
     console.log(`File is ${[file.name, file.size, file.type, file.lastModified].join(' ')}`);
 
     if (file.size === 0) {
@@ -40,4 +40,38 @@ const sendData = (channel, file) => {
   });
 }
 
-export default sendFile;
+let downloadInProgress = false;
+let incomingFileInfo;
+
+receiveFile = ({data}}) => {
+  return new Promise((resolve, reject) => {
+    if(downloadInProgress=== false) {
+      incomingFileInfo = JSON.parse( data.toString() );
+      console.log(`${incomingFileInfo.fileName} : ${incomingFileInfo.fileSize}`);
+      downloadInProgress = true;
+    } else {
+      console.log(`Received Message ${data.byteLength}`);
+      receiveBuffer.push(data);
+      receivedSize += data.byteLength;
+
+      receiveProgress.value = receivedSize;
+
+      if (receivedSize === incomingFileInfo.fileSize) {
+        const received = new Blob(receiveBuffer);
+        receiveBuffer = [];
+
+        resolve({fileName : incomingFileInfo.fileName, fileSize : incomingFileInfo.fileSize});
+
+        fileRecvEnd();
+      }
+    });
+  }
+}
+
+function fileRecvEnd() {
+  console.log('complete to receive file, file : ', );
+
+  downloadInProgress = false;
+  receiveBuffer = [];
+  receivedSize = 0;
+}
