@@ -41,8 +41,10 @@ const sendFile = (channel, file) => {
 }
 
 let downloadInProgress = false;
+let receiveBuffer = [];
 let incomingFileInfo;
 let receiveChannel;
+let receivedSize = 0;
 
 function receiveChannelCallback(event) {
   console.log('Receive Channel Callback');
@@ -60,6 +62,7 @@ function receiveChannelCallback(event) {
     downloadAnchor.removeAttribute('href');
   }
 }
+
 
 onReceiveMessageCallback = ({data}) => {
   if(downloadInProgress=== false) {
