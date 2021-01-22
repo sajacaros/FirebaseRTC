@@ -1,6 +1,6 @@
 const chunkSize = 16384;
-
 let fileReader;
+const downloadAnchor = document.querySelector('a#download');
 
 const readSlice = (file, currentOffset) => {
   console.log('readSlice ', currentOffset);
@@ -42,29 +42,49 @@ const sendFile = (channel, file) => {
 
 let downloadInProgress = false;
 let incomingFileInfo;
+let receiveChannel;
+
+function receiveChannelCallback(event) {
+  console.log('Receive Channel Callback');
+  receiveChannel = event.channel;
+  // receiveChannel.binaryType = 'arraybuffer';
+  receiveChannel.onmessage = onReceiveMessageCallback;
+  receiveChannel.onopen = onReceiveChannelStateChange;
+  receiveChannel.onclose = onReceiveChannelStateChange;
+
+  receivedSize = 0;
+  downloadAnchor.textContent = '';
+  downloadAnchor.removeAttribute('download');
+  if (downloadAnchor.href) {
+    URL.revokeObjectURL(downloadAnchor.href);
+    downloadAnchor.removeAttribute('href');
+  }
+}
 
 receiveFile = ({data}}) => {
-  return new Promise((resolve, reject) => {
-    if(downloadInProgress=== false) {
-      incomingFileInfo = JSON.parse( data.toString() );
-      console.log(`${incomingFileInfo.fileName} : ${incomingFileInfo.fileSize}`);
-      downloadInProgress = true;
-    } else {
-      console.log(`Received Message ${data.byteLength}`);
-      receiveBuffer.push(data);
-      receivedSize += data.byteLength;
+  if(downloadInProgress=== false) {
+    incomingFileInfo = JSON.parse( data.toString() );
+    console.log(`${incomingFileInfo.fileName} : ${incomingFileInfo.fileSize}`);
+    downloadInProgress = true;
+  } else {
+    console.log(`Received Message ${data.byteLength}`);
+    receiveBuffer.push(data);
+    receivedSize += data.byteLength;
 
-      receiveProgress.value = receivedSize;
+    receiveProgress.value = receivedSize;
 
-      if (receivedSize === incomingFileInfo.fileSize) {
-        const received = new Blob(receiveBuffer);
-        receiveBuffer = [];
+    if (receivedSize === incomingFileInfo.fileSize) {
+      const received = new Blob(receiveBuffer);
+      receiveBuffer = [];
 
-        resolve({fileName : incomingFileInfo.fileName, fileSize : incomingFileInfo.fileSize});
-
-        fileRecvEnd();
-      }
-    });
+      downloadAnchor.href = URL.createObjectURL(received);
+      downloadAnchor.download = incomingFileInfo.fileName;
+      downloadAnchor.textContent =
+        `Click to download '${incomingFileInfo.fileName}' (${incomingFileInfo.fileSize} bytes)`;
+      downloadAnchor.style.display = 'block';
+      
+      fileRecvEnd();
+    }
   }
 }
 

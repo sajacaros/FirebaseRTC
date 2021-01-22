@@ -370,10 +370,7 @@ function registerPeerConnectionListeners(roomId) {
         `ICE connection state change: ${peerConnection.iceConnectionState}`);
   });
 
-  peerConnection.addEventListener('datachannel', ()=>{
-    const {fileName, fileSize} = receiveFile();
-    console.log(`recv fileName ${fileName}, size : ${fileSzie}`);
-  });
+  peerConnection.addEventListener('datachannel', receiveChannelCallback);
 
   const db = firebase.firestore();
   const roomRef = db.collection('rooms').doc(`${roomId}`);
