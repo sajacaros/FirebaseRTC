@@ -1,9 +1,6 @@
 const fileInput = document.querySelector('input#fileInput');
 const sendFileButton = document.querySelector('button#sendFile');
 
-let receiveBuffer = [];
-let receivedSize = 0;
-
 mdc.ripple.MDCRipple.attachTo(document.querySelector('.mdc-button'));
 
 const configuration = {
@@ -433,9 +430,7 @@ const fileSendInitialize = () => {
   fileInput.value = null;
   fileInput.disabled = false;
   sendFileButton.disabled = true;
-  
-  receiveBuffer = [];
-  receivedSize = 0;
+  sendFileButton.removeEventListener('click');
 }
 
 function handleFileInputChange() {
