@@ -61,7 +61,7 @@ function receiveChannelCallback(event) {
   }
 }
 
-receiveFile = ({data}}) => {
+receiveFile = ({data}) => {
   if(downloadInProgress=== false) {
     incomingFileInfo = JSON.parse( data.toString() );
     console.log(`${incomingFileInfo.fileName} : ${incomingFileInfo.fileSize}`);
@@ -82,7 +82,7 @@ receiveFile = ({data}}) => {
       downloadAnchor.textContent =
         `Click to download '${incomingFileInfo.fileName}' (${incomingFileInfo.fileSize} bytes)`;
       downloadAnchor.style.display = 'block';
-      
+
       fileRecvEnd();
     }
   }
