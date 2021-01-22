@@ -71,8 +71,6 @@ onReceiveMessageCallback = ({data}) => {
     receiveBuffer.push(data);
     receivedSize += data.byteLength;
 
-    receiveProgress.value = receivedSize;
-
     if (receivedSize === incomingFileInfo.fileSize) {
       const received = new Blob(receiveBuffer);
       receiveBuffer = [];
