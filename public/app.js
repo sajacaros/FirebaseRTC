@@ -1,5 +1,7 @@
 const fileInput = document.querySelector('input#fileInput');
 const sendFileButton = document.querySelector('button#sendFile');
+const sendMessageButton = document.querySelector('button#sendMessage')
+const chatInput = document.querySelector('input#chatInput')
 
 mdc.ripple.MDCRipple.attachTo(document.querySelector('.mdc-button'));
 
@@ -24,6 +26,8 @@ let roomId = null;
 let localTransceiver = null;
 let remoteTransceiver = null;
 let isNegoDone = true;
+let sendChannel = null;
+let chatChannel = null;
 const initialRoomNumber = 10000;
 
 function init() {
@@ -35,6 +39,8 @@ function init() {
   document.querySelector('#sendonlyBtn').addEventListener('click', sendOnly);
   document.querySelector('#recvonlyBtn').addEventListener('click', recvOnly);
   fileInput.addEventListener('change', handleFileInputChange, false);
+  sendMessageButton.addEventListener('click', sendMessage);
+  chatInput.addEventListener('change', handleChageMessageInput);
   roomDialog = new mdc.dialog.MDCDialog(document.querySelector('#room-dialog'));
   fileInput.disabled = true;
 }
@@ -84,16 +90,11 @@ async function createRoom() {
   // Code for collecting ICE candidates above
 
   // Code for creating a room below
-  sendChannel = peerConnection.createDataChannel('sendDataChannel');
+  fileChannel = peerConnection.createDataChannel('sendDataChannel');
+  chatChannel = peerConnection.createDataChannel('chatChannel');
   const offer = await peerConnection.createOffer();
   await peerConnection.setLocalDescription(offer);
   console.log('Created offer:', offer);
-
-  // localTransceiver = peerConnection.addTransceiver(localStream.getVideoTracks()[0]);
-  // console.log('localTransceiver : ', localTransceiver);
-  // localTransceiver.receiver.track.onmute = () => console.log("transceiver.receiver.track.onmute");
-  // localTransceiver.receiver.track.onended = () => console.log("transceiver.receiver.track.onended");
-  // localTransceiver.receiver.track.onunmute = () => console.log("transceiver.receiver.track.onunmute");
 
   const roomWithOffer = {
     'offer': {
@@ -248,16 +249,11 @@ async function joinRoomById(roomId) {
     const offer = roomSnapshot.data().offer;
     console.log('Got offer:', offer);
     await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
-    sendChannel = peerConnection.createDataChannel('sendDataChannel');
+    fileChannel = peerConnection.createDataChannel('sendDataChannel');
+    chatChannel = peerConnection.createDataChannel('chatChannel');
     const answer = await peerConnection.createAnswer();
     console.log('Created answer:', answer);
     await peerConnection.setLocalDescription(answer);
-
-    // localTransceiver = peerConnection.addTransceiver(localStream.getVideoTracks()[0]);
-    // console.log('localTransceiver : ', localTransceiver);
-    // localTransceiver.receiver.track.onmute = () => console.log("transceiver.receiver.track.onmute");
-    // localTransceiver.receiver.track.onended = () => console.log("transceiver.receiver.track.onended");
-    // localTransceiver.receiver.track.onunmute = () => console.log("transceiver.receiver.track.onunmute");
 
     const roomWithAnswer = {
       answer: {
@@ -366,8 +362,6 @@ function registerPeerConnectionListeners(roomId) {
         `ICE connection state change: ${peerConnection.iceConnectionState}`);
   });
 
-  peerConnection.addEventListener('datachannel', receiveChannelCallback);
-
   const db = firebase.firestore();
   const roomRef = db.collection('rooms').doc(`${roomId}`);
 
@@ -377,7 +371,20 @@ function registerPeerConnectionListeners(roomId) {
     }
     isNegoDone = false
     console.log('Peerconnection negotiationneeded event: ', e);
-    sendChannel = peerConnection.createDataChannel('sendDataChannel');
+    if(!fileChannel) {
+      fileChannel = peerConnection.createDataChannel('sendDataChannel');
+      fileChannel.onmessage = onReceiveFileCallback;
+      fileChannel.onopen = onReceiveChannelStateChange;
+      fileChannel.onclose = onReceiveChannelStateChange;
+    }
+    
+    if(chatChannel) {
+      chatChannel = peerConnection.createDataChannel('chatChannel');
+      chatChannel.onmessage = (message)=>console.log('chat received message, message : ', message);
+      chatChannel.onopen = (state)=>console.log('chat channel open, state :', state);
+      chatChannel.onclose = (state)=>console.log('chat channel close, state :', state);
+    }
+
     const offer = await peerConnection.createOffer()
     await peerConnection.setLocalDescription(offer);
     const roomWithOffer = {
@@ -439,7 +446,7 @@ function handleFileInputChange() {
   } else {
     sendFileButton.disabled = false;
     sendFileButton.addEventListener('click', () => {
-      const fileSendPromise = sendFile(sendChannel, file)
+      const fileSendPromise = sendFile(fileChannel, file)
       fileSendPromise.then(
         ()=>fileSendInitialize(), 
         e=>console.error('file send failed, error : ', e)
@@ -448,6 +455,19 @@ function handleFileInputChange() {
   }
 }
 
+function handleChageMessageInput(e) {
+  if(e.target.value && e.target.value !== '') {
+    sendMessageButton.disabled = false; 
+  }  
+}
 
+function sendMessage() {
+  if(chatInput.value && chatInput.value !== '') {
+    console.log('send message, message : ', chatInput.value);
+    chatChannel.send(chatInput.value);
+    chatInput.value = null;
+    sendMessageButton.disabled = true;
+  }
+}
 
 init();

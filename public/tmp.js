@@ -18,7 +18,7 @@ let remoteStream = null;
 let roomDialog = null;
 let roomId = null;
 
-let sendChannel;
+let fileChannel;
 let receiveChannel;
 let fileReader;
 const bitrateDiv = document.querySelector('div#bitrate');
@@ -352,17 +352,17 @@ async function createConnection() {
   abortButton.disabled = false;
   sendFileButton.disabled = true;
   
-  sendChannel = peerConnection.createDataChannel('sendDataChannel');
+  fileChannel = peerConnection.createDataChannel('sendDataChannel');
   // sendChannel.binaryType = 'arraybuffer';
-  console.log('Created send data channel, ', sendChannel);
+  console.log('Created send data channel, ', fileChannel);
 
-  sendChannel.addEventListener('open', onSendChannelStateChange);
-  sendChannel.addEventListener('close', onSendChannelStateChange);
-  sendChannel.addEventListener('error', error => console.error('Error in sendChannel:', error));
+  fileChannel.addEventListener('open', onSendChannelStateChange);
+  fileChannel.addEventListener('close', onSendChannelStateChange);
+  fileChannel.addEventListener('error', error => console.error('Error in sendChannel:', error));
 }
 
 function onSendChannelStateChange() {
-  const readyState = sendChannel.readyState;
+  const readyState = fileChannel.readyState;
   console.log(`Send channel state is: ${readyState}`);
 }
 
@@ -382,7 +382,7 @@ function sendData() {
   }
   sendProgress.max = file.size;
   receiveProgress.max = file.size;
-  sendChannel.send(JSON.stringify({
+  fileChannel.send(JSON.stringify({
     fileName: file.name,
     fileSize: file.size
   }));
@@ -393,7 +393,7 @@ function sendData() {
   fileReader.addEventListener('abort', event => console.log('File reading aborted:', event));
   fileReader.addEventListener('load', e => {
     console.log('FileRead.onload ', e);
-    sendChannel.send(e.target.result);
+    fileChannel.send(e.target.result);
     offset += e.target.result.byteLength;
     sendProgress.value = offset;
     if (offset < file.size) {
@@ -414,7 +414,7 @@ function receiveChannelCallback(event) {
   console.log('Receive Channel Callback');
   receiveChannel = event.channel;
   // receiveChannel.binaryType = 'arraybuffer';
-  receiveChannel.onmessage = onReceiveMessageCallback;
+  receiveChannel.onmessage = onReceiveFileCallback;
   receiveChannel.onopen = onReceiveChannelStateChange;
   receiveChannel.onclose = onReceiveChannelStateChange;
 
@@ -431,7 +431,7 @@ function receiveChannelCallback(event) {
 var downloadInProgress = false;
 var incomingFileInfo;
 
-function onReceiveMessageCallback(event) {
+function onReceiveFileCallback(event) {
   if(downloadInProgress=== false) {
     incomingFileInfo = JSON.parse( event.data.toString() );
     console.log(`${incomingFileInfo.fileName} : ${incomingFileInfo.fileSize}`);

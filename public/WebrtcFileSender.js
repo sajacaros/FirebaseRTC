@@ -46,14 +46,23 @@ let incomingFileInfo;
 let receiveChannel;
 let receivedSize = 0;
 
-function receiveChannelCallback(event) {
-  console.log('Receive Channel Callback');
-  receiveChannel = event.channel;
-  // receiveChannel.binaryType = 'arraybuffer';
-  receiveChannel.onmessage = onReceiveMessageCallback;
-  receiveChannel.onopen = onReceiveChannelStateChange;
-  receiveChannel.onclose = onReceiveChannelStateChange;
+// function receiveChannelCallback(event) {
+//   console.log('Receive Channel Callback');
+//   receiveChannel = event.channel;
+//   // receiveChannel.binaryType = 'arraybuffer';
+//   receiveChannel.onmessage = onReceiveFileCallback;
+//   receiveChannel.onopen = onReceiveChannelStateChange;
+//   receiveChannel.onclose = onReceiveChannelStateChange;
 
+//   receivedSize = 0;
+//   downloadAnchor.textContent = '';
+//   downloadAnchor.removeAttribute('download');
+//   if (downloadAnchor.href) {
+//     URL.revokeObjectURL(downloadAnchor.href);
+//     downloadAnchor.removeAttribute('href');
+//   }
+// }
+function initFileSend() {
   receivedSize = 0;
   downloadAnchor.textContent = '';
   downloadAnchor.removeAttribute('download');
@@ -64,7 +73,7 @@ function receiveChannelCallback(event) {
 }
 
 
-onReceiveMessageCallback = ({data}) => {
+onReceiveFileCallback = ({data}) => {
   if(downloadInProgress=== false) {
     incomingFileInfo = JSON.parse( data.toString() );
     console.log(`${incomingFileInfo.fileName} : ${incomingFileInfo.fileSize}`);
@@ -101,3 +110,5 @@ function fileRecvEnd() {
   receiveBuffer = [];
   receivedSize = 0;
 }
+
+initFileSend();
