@@ -91,7 +91,13 @@ async function createRoom() {
 
   // Code for creating a room below
   fileChannel = peerConnection.createDataChannel('sendDataChannel');
+  fileChannel.onmessage = onReceiveFileCallback;
+  fileChannel.onopen = onReceiveChannelStateChange;
+  fileChannel.onclose = onReceiveChannelStateChange;
   chatChannel = peerConnection.createDataChannel('chatChannel');
+  chatChannel.onmessage = (message)=>console.log('chat received message, message : ', message);
+  chatChannel.onopen = (state)=>console.log('chat channel open, state :', state);
+  chatChannel.onclose = (state)=>console.log('chat channel close, state :', state);
   const offer = await peerConnection.createOffer();
   await peerConnection.setLocalDescription(offer);
   console.log('Created offer:', offer);
@@ -250,7 +256,13 @@ async function joinRoomById(roomId) {
     console.log('Got offer:', offer);
     await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
     fileChannel = peerConnection.createDataChannel('sendDataChannel');
+    fileChannel.onmessage = onReceiveFileCallback;
+    fileChannel.onopen = onReceiveChannelStateChange;
+    fileChannel.onclose = onReceiveChannelStateChange;
     chatChannel = peerConnection.createDataChannel('chatChannel');
+    chatChannel.onmessage = (message)=>console.log('chat received message, message : ', message);
+    chatChannel.onopen = (state)=>console.log('chat channel open, state :', state);
+    chatChannel.onclose = (state)=>console.log('chat channel close, state :', state);
     const answer = await peerConnection.createAnswer();
     console.log('Created answer:', answer);
     await peerConnection.setLocalDescription(answer);
@@ -371,22 +383,14 @@ function registerPeerConnectionListeners(roomId) {
     }
     isNegoDone = false
     console.log('Peerconnection negotiationneeded event: ', e);
-    if(!fileChannel) {
-      fileChannel = peerConnection.createDataChannel('sendDataChannel');
-    }
-    fileChannel.onmessage = onReceiveFileCallback;
-    fileChannel.onopen = onReceiveChannelStateChange;
-    fileChannel.onclose = onReceiveChannelStateChange;
-    
-    
-    if(!chatChannel) {
-      chatChannel = peerConnection.createDataChannel('chatChannel');
-     }
-    chatChannel.onmessage = (message)=>console.log('chat received message, message : ', message);
-    chatChannel.onopen = (state)=>console.log('chat channel open, state :', state);
-    chatChannel.onclose = (state)=>console.log('chat channel close, state :', state);
-    
+    // if(!fileChannel) {
+    //   fileChannel = peerConnection.createDataChannel('sendDataChannel');
+    // }
 
+    // if(!chatChannel) {
+    //   chatChannel = peerConnection.createDataChannel('chatChannel');
+    //  }
+    
     const offer = await peerConnection.createOffer()
     await peerConnection.setLocalDescription(offer);
     const roomWithOffer = {
