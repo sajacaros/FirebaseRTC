@@ -461,6 +461,7 @@ function sendMessage() {
   if(chatInput.value && chatInput.value !== '') {
     console.log('send message, message : ', chatInput.value);
     chatChannel.send(chatInput.value);
+    addChatMessage(chatInput.value, '-> ');
     chatInput.value = null;
     sendMessageButton.disabled = true;
   }

@@ -1,7 +1,7 @@
 const chunkSize = 16384;
 let fileReader;
 const downloadAnchor = document.querySelector('a#download');
-
+const chatBox = document.querySelector('div#chatBox');
 const readSlice = (file, currentOffset) => {
   console.log('readSlice ', currentOffset);
   const slice = file.slice(currentOffset, currentOffset + chunkSize);
@@ -62,14 +62,25 @@ function receiveChannelCallback(event) {
       downloadAnchor.removeAttribute('href');
     }
   } else if(event.channel.label === 'chatChannel'){
-    receiveChannel.onmessage = (data)=>console.log(data);
+    receiveChannel.onmessage = onReceiveMessageCallback;
     receiveChannel.onopen = onReceiveChannelStateChange;
     receiveChannel.onclose = onReceiveChannelStateChange;
   }
 }
 
+const addChatMessage=(message, direction)=>{
+  var el = document.createElement("p");
+  var txtNode = document.createTextNode(direction +' '+ message);
 
-onReceiveFileCallback = ({data}) => {
+  el.appendChild(txtNode);
+  chatBox.appendChild(el);
+} 
+
+const onReceiveMessageCallback = ({data})=> {
+  addChatMessage(data, '<- ');
+}
+
+const onReceiveFileCallback = ({data}) => {
   if(downloadInProgress=== false) {
     incomingFileInfo = JSON.parse( data.toString() );
     console.log('incoming data : ', incomingFileInfo);
