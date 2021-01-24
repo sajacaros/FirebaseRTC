@@ -40,7 +40,7 @@ function init() {
   document.querySelector('#recvonlyBtn').addEventListener('click', recvOnly);
   fileInput.addEventListener('change', handleFileInputChange, false);
   sendMessageButton.addEventListener('click', sendMessage);
-  chatInput.addEventListener('change', handleChageMessageInput);
+  chatInput.addEventListener('input', handleChageMessageInput);
   roomDialog = new mdc.dialog.MDCDialog(document.querySelector('#room-dialog'));
   fileInput.disabled = true;
 }
