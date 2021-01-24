@@ -43,25 +43,17 @@ const sendFile = (channel, file) => {
 let downloadInProgress = false;
 let receiveBuffer = [];
 let incomingFileInfo;
+let receiveChannel;
 let receivedSize = 0;
 
-// function receiveChannelCallback(event) {
-//   console.log('Receive Channel Callback');
-//   receiveChannel = event.channel;
-//   // receiveChannel.binaryType = 'arraybuffer';
-//   receiveChannel.onmessage = onReceiveFileCallback;
-//   receiveChannel.onopen = onReceiveChannelStateChange;
-//   receiveChannel.onclose = onReceiveChannelStateChange;
+function receiveChannelCallback(event) {
+  console.log('Receive Channel Callback, event : ', event);
+  receiveChannel = event.channel;
+  // receiveChannel.binaryType = 'arraybuffer';
+  receiveChannel.onmessage = onReceiveFileCallback;
+  receiveChannel.onopen = onReceiveChannelStateChange;
+  receiveChannel.onclose = onReceiveChannelStateChange;
 
-//   receivedSize = 0;
-//   downloadAnchor.textContent = '';
-//   downloadAnchor.removeAttribute('download');
-//   if (downloadAnchor.href) {
-//     URL.revokeObjectURL(downloadAnchor.href);
-//     downloadAnchor.removeAttribute('href');
-//   }
-// }
-function initFileSend() {
   receivedSize = 0;
   downloadAnchor.textContent = '';
   downloadAnchor.removeAttribute('download');
@@ -75,7 +67,8 @@ function initFileSend() {
 onReceiveFileCallback = ({data}) => {
   if(downloadInProgress=== false) {
     incomingFileInfo = JSON.parse( data.toString() );
-    console.log(`${incomingFileInfo.fileName} : ${incomingFileInfo.fileSize}`);
+    console.log('incoming data : ', incomingFileInfo);
+    // console.log(`${incomingFileInfo.fileName} : ${incomingFileInfo.fileSize}`);
     downloadInProgress = true;
   } else {
     console.log(`Received Message ${data.byteLength}`);
@@ -97,8 +90,9 @@ onReceiveFileCallback = ({data}) => {
   }
 }
 
-async function onReceiveChannelStateChange(event) {
-  console.log('Receive channel state is: ', event);
+async function onReceiveChannelStateChange() {
+  const readyState = receiveChannel.readyState;
+  console.log(`Receive channel state is: ${readyState}`);
 }
 
 function fileRecvEnd() {
@@ -108,5 +102,3 @@ function fileRecvEnd() {
   receiveBuffer = [];
   receivedSize = 0;
 }
-
-initFileSend();

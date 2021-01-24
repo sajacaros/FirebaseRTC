@@ -91,13 +91,7 @@ async function createRoom() {
 
   // Code for creating a room below
   fileChannel = peerConnection.createDataChannel('sendDataChannel');
-  fileChannel.onmessage = onReceiveFileCallback;
-  fileChannel.onopen = onReceiveChannelStateChange;
-  fileChannel.onclose = onReceiveChannelStateChange;
   chatChannel = peerConnection.createDataChannel('chatChannel');
-  chatChannel.onmessage = (message)=>console.log('chat received message, message : ', message);
-  chatChannel.onopen = (state)=>console.log('chat channel open, state :', state);
-  chatChannel.onclose = (state)=>console.log('chat channel close, state :', state);
   const offer = await peerConnection.createOffer();
   await peerConnection.setLocalDescription(offer);
   console.log('Created offer:', offer);
@@ -256,13 +250,7 @@ async function joinRoomById(roomId) {
     console.log('Got offer:', offer);
     await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
     fileChannel = peerConnection.createDataChannel('sendDataChannel');
-    fileChannel.onmessage = onReceiveFileCallback;
-    fileChannel.onopen = onReceiveChannelStateChange;
-    fileChannel.onclose = onReceiveChannelStateChange;
     chatChannel = peerConnection.createDataChannel('chatChannel');
-    chatChannel.onmessage = (message)=>console.log('chat received message, message : ', message);
-    chatChannel.onopen = (state)=>console.log('chat channel open, state :', state);
-    chatChannel.onclose = (state)=>console.log('chat channel close, state :', state);
     const answer = await peerConnection.createAnswer();
     console.log('Created answer:', answer);
     await peerConnection.setLocalDescription(answer);
@@ -373,6 +361,8 @@ function registerPeerConnectionListeners(roomId) {
     console.log(
         `ICE connection state change: ${peerConnection.iceConnectionState}`);
   });
+
+  peerConnection.addEventListener('datachannel', receiveChannelCallback);
 
   const db = firebase.firestore();
   const roomRef = db.collection('rooms').doc(`${roomId}`);
