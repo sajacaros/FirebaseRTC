@@ -373,17 +373,19 @@ function registerPeerConnectionListeners(roomId) {
     console.log('Peerconnection negotiationneeded event: ', e);
     if(!fileChannel) {
       fileChannel = peerConnection.createDataChannel('sendDataChannel');
-      fileChannel.onmessage = onReceiveFileCallback;
-      fileChannel.onopen = onReceiveChannelStateChange;
-      fileChannel.onclose = onReceiveChannelStateChange;
     }
+    fileChannel.onmessage = onReceiveFileCallback;
+    fileChannel.onopen = onReceiveChannelStateChange;
+    fileChannel.onclose = onReceiveChannelStateChange;
     
-    if(chatChannel) {
+    
+    if(!chatChannel) {
       chatChannel = peerConnection.createDataChannel('chatChannel');
-      chatChannel.onmessage = (message)=>console.log('chat received message, message : ', message);
-      chatChannel.onopen = (state)=>console.log('chat channel open, state :', state);
-      chatChannel.onclose = (state)=>console.log('chat channel close, state :', state);
-    }
+     }
+    chatChannel.onmessage = (message)=>console.log('chat received message, message : ', message);
+    chatChannel.onopen = (state)=>console.log('chat channel open, state :', state);
+    chatChannel.onclose = (state)=>console.log('chat channel close, state :', state);
+    
 
     const offer = await peerConnection.createOffer()
     await peerConnection.setLocalDescription(offer);
