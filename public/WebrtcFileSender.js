@@ -43,7 +43,6 @@ const sendFile = (channel, file) => {
 let downloadInProgress = false;
 let receiveBuffer = [];
 let incomingFileInfo;
-let receiveChannel;
 let receivedSize = 0;
 
 // function receiveChannelCallback(event) {
@@ -98,9 +97,8 @@ onReceiveFileCallback = ({data}) => {
   }
 }
 
-async function onReceiveChannelStateChange() {
-  const readyState = receiveChannel.readyState;
-  console.log(`Receive channel state is: ${readyState}`);
+async function onReceiveChannelStateChange(event) {
+  console.log('Receive channel state is: ', event);
 }
 
 function fileRecvEnd() {
