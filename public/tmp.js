@@ -414,7 +414,7 @@ function receiveChannelCallback(event) {
   console.log('Receive Channel Callback');
   receiveChannel = event.channel;
   // receiveChannel.binaryType = 'arraybuffer';
-  receiveChannel.onmessage = onReceiveFileCallback;
+  receiveChannel.onmessage = onReceiveMessageCallback;
   receiveChannel.onopen = onReceiveChannelStateChange;
   receiveChannel.onclose = onReceiveChannelStateChange;
 
@@ -431,7 +431,7 @@ function receiveChannelCallback(event) {
 var downloadInProgress = false;
 var incomingFileInfo;
 
-function onReceiveFileCallback(event) {
+function onReceiveMessageCallback(event) {
   if(downloadInProgress=== false) {
     incomingFileInfo = JSON.parse( event.data.toString() );
     console.log(`${incomingFileInfo.fileName} : ${incomingFileInfo.fileSize}`);

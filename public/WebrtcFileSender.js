@@ -43,23 +43,28 @@ const sendFile = (channel, file) => {
 let downloadInProgress = false;
 let receiveBuffer = [];
 let incomingFileInfo;
-let receiveChannel;
 let receivedSize = 0;
 
 function receiveChannelCallback(event) {
   console.log('Receive Channel Callback, event : ', event);
-  receiveChannel = event.channel;
-  // receiveChannel.binaryType = 'arraybuffer';
-  receiveChannel.onmessage = onReceiveFileCallback;
-  receiveChannel.onopen = onReceiveChannelStateChange;
-  receiveChannel.onclose = onReceiveChannelStateChange;
+  const receiveChannel = event.channel;
+  if(event.channel.label === 'sendDataChannel'){
+    // receiveChannel.binaryType = 'arraybuffer';
+    receiveChannel.onmessage = onReceiveFileCallback;
+    receiveChannel.onopen = onReceiveChannelStateChange;
+    receiveChannel.onclose = onReceiveChannelStateChange;
 
-  receivedSize = 0;
-  downloadAnchor.textContent = '';
-  downloadAnchor.removeAttribute('download');
-  if (downloadAnchor.href) {
-    URL.revokeObjectURL(downloadAnchor.href);
-    downloadAnchor.removeAttribute('href');
+    receivedSize = 0;
+    downloadAnchor.textContent = '';
+    downloadAnchor.removeAttribute('download');
+    if (downloadAnchor.href) {
+      URL.revokeObjectURL(downloadAnchor.href);
+      downloadAnchor.removeAttribute('href');
+    }
+  } else if(event.channel.label === 'chatChannel'){
+    receiveChannel.onmessage = (data)=>console.log(data);
+    receiveChannel.onopen = onReceiveChannelStateChange;
+    receiveChannel.onclose = onReceiveChannelStateChange;
   }
 }
 
@@ -90,9 +95,8 @@ onReceiveFileCallback = ({data}) => {
   }
 }
 
-async function onReceiveChannelStateChange() {
-  const readyState = receiveChannel.readyState;
-  console.log(`Receive channel state is: ${readyState}`);
+async function onReceiveChannelStateChange(e) {
+  console.log('Receive channel state is: ', e);
 }
 
 function fileRecvEnd() {
